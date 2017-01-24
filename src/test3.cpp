@@ -94,11 +94,14 @@ class AlgorithmSolver {
     const HeuristicT* mp_h;
   };
 
+  template<typename HeuristicT>
+  bool launchProblemSolver();
+
   void parse_problem_dat(const std::string& filename);
   void compute_all_distances();
 
   template<typename HeuristicT>
-  void construct_path();
+  bool construct_path();
 
   template<typename T>
   static std::vector<T> parse_vector_dat(std::string vector_data);
@@ -154,17 +157,43 @@ class AlgorithmSolver {
   /// For all nodes in the problem, the distance from the nearest other node
   std::vector<RealNumber> m_distanceFromNearest;
 
+  /// The set of vertices which have been linked in some path
+  std::set<VertexType> m_linkedVertices;
+
+  /// All paths founds
   std::vector<Path> m_foundPaths;
 };
 
+template<typename HeuristicT>
+bool AlgorithmSolver::launchProblemSolver() {
+  m_foundPaths.clear();
+  m_linkedVertices.clear();
+
+  while (m_linkedVertices.size() != m_numNodes) {
+    if (construct_path<HeuristicT>() == false) {
+      // if the algorithm cannot construct a path
+      // that means there is a problem
+      // Not feasible solution found
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool AlgorithmSolver::checkVertexIsInAPath(
     const VertexType& v, std::pair<unsigned, unsigned>* outIndices) const {
-  for (unsigned i = 0; i < m_foundPaths.size(); ++i) {
-    const Path& p = m_foundPaths[i];
-    for (unsigned j = 0; j < p.m_pathVertices.size(); ++j) {
-      if (p.m_pathVertices[j] == v) {
-        *outIndices = std::make_pair(i, j);
-        return true;
+  assert(outIndices != nullptr);
+
+  // First of all check if v is linked
+  if (m_linkedVertices.find(v) != m_linkedVertices.cend()) {
+    for (unsigned i = 0; i < m_foundPaths.size(); ++i) {
+      const Path& p = m_foundPaths[i];
+      for (unsigned j = 0; j < p.m_pathVertices.size(); ++j) {
+        if (p.m_pathVertices[j] == v) {
+          *outIndices = std::make_pair(i, j);
+          return true;
+        }
       }
     }
   }
@@ -172,40 +201,34 @@ bool AlgorithmSolver::checkVertexIsInAPath(
 }
 
 template<typename HeuristicT>
-void AlgorithmSolver::construct_path() {
+bool AlgorithmSolver::construct_path() {
   using OpenList = std::stack<Path>;
 
-  // First of all I have to get which nodes are not linked yet
-  // and which nodes are leaf.
-  // TODO(biagio): you can cache this information in the class problem
-  std::set<VertexType> linkedVertices;
-  std::set<VertexType> leafVertices;
-  for (const auto& path : m_foundPaths) {
-    leafVertices.insert(path.m_pathVertices.front());
-    for (const auto& v : path.m_pathVertices) {
-      linkedVertices.insert(v);
-    }
-  }
-
+  // Get the list of free vertices (not already linked)
   std::vector<VertexType> freeVertices;
   std::vector<RealNumber> distancesFree;
   for (unsigned i = 0; i < m_numNodes; ++i) {
-    // For all vertices check if that is not already linked
-    if (linkedVertices.find(i) == linkedVertices.cend()) {
+    if (m_linkedVertices.find(i) == m_linkedVertices.cend()) {
       freeVertices.push_back(i);
       distancesFree.push_back(m_distanceMatrix[i][SCHOOL_NODE]);
     }
   }
 
+  // Among the free nodes, find what is most distant from school
   const auto farestDistance = std::max_element(distancesFree.cbegin(),
                                                distancesFree.cend());
+  // Get the index of the node farest from school
   const auto farestIndex = std::distance(distancesFree.cbegin(),
                                          farestDistance);
+  // Get the vertex most distant from school
   const auto& farestNode = freeVertices[farestIndex];
 
+  // Some local variables
   std::pair<unsigned, unsigned> indices;
   VectVertices nexts;
   OpenList open;
+
+  // Load into the openlist the initial path
   Path initialPath;
   initialPath.m_pathVertices.push_back(farestNode);
   initialPath.m_routeLenPerLevel.push_back(0);
@@ -215,15 +238,32 @@ void AlgorithmSolver::construct_path() {
     const Path current = std::move(open.top());
     open.pop();
 
+    // If the last node in the current path is the school
+    // a path has been found.
     if (current.m_pathVertices.back() == SCHOOL_NODE) {
+      // All vertices in the path have to be added to
+      // the list of linked vertices
+      for (const auto& v : current.m_pathVertices) {
+        m_linkedVertices.insert(v);
+      }
+
+      // Insert the path into the member list
       m_foundPaths.push_back(std::move(current));
-      return;
+      return true;
     }
 
+    // Find all possibile nodes in which the current path can
+    // continue into
     find_possible_next_nodes(current, &nexts);
+
+    // All possibile choices must to be sorted in according to the
+    // heuristic
     sort_heuristic_accordance<HeuristicT>(current.m_pathVertices.back(),
                                           &nexts);
+
+    // Test all possible choices
     for (const auto& n : nexts) {
+      // If n is already in a path the current path must to be linked
       if (checkVertexIsInAPath(n, &indices)) {
         if (indices.second == 0) {
           // In this case the vertex n is a leaf of an existent path
@@ -245,22 +285,28 @@ void AlgorithmSolver::construct_path() {
           }
 
           if (admissible == true) {
-            std::for_each(current.m_pathVertices.crbegin(),
-                          current.m_pathVertices.crend(),
-                          [this, &oldPath, &lenPath]
-                          (const VertexType& v) {
-                            RealNumber newDistance =
-                                m_distanceMatrix[v]
-                                [oldPath.m_pathVertices.front()] + lenPath;
-                            oldPath.m_pathVertices.insert(
-                                oldPath.m_pathVertices.begin(),
-                                v);
-                            oldPath.m_routeLenPerLevel.insert(
-                                oldPath.m_routeLenPerLevel.begin(),
-                                newDistance);
-                          });
-            return;
-          }
+            std::for_each(   // for each vertices in the current path
+                current.m_pathVertices.crbegin(),
+                current.m_pathVertices.crend(),
+                [this, &oldPath, &lenPath]
+                (const VertexType& v) {
+                  RealNumber newDistance =
+                      m_distanceMatrix[v][oldPath.m_pathVertices.front()] +
+                      lenPath;
+
+                  // insert in head position the vertex in the oldPath
+                  oldPath.m_pathVertices.insert(
+                      oldPath.m_pathVertices.begin(), v);
+
+                  // insert the routeLen in head
+                  oldPath.m_routeLenPerLevel.insert(
+                      oldPath.m_routeLenPerLevel.begin(), newDistance);
+
+                  // insert the vertex 'v' in the linked nodes
+                  m_linkedVertices.insert(v);
+                });
+            return true;
+          }   // if admissible == true
         } else {
           // In this case the vertex n is a inner node of an existent path
           // Note that inner node can be also zero (the SCHOOL NODE)
@@ -271,6 +317,7 @@ void AlgorithmSolver::construct_path() {
           const VertexType& linkRef = oldPath.m_pathVertices[indices.second];
           const RealNumber& lenLink = m_distanceMatrix[lastCurrent][linkRef];
 
+          // Create new nodes as the list from linkRef to end (of old Path)
           VectVertices newPathNodes;
           std::copy(oldPath.m_pathVertices.cbegin() + indices.second,
                     oldPath.m_pathVertices.cend(),
@@ -280,6 +327,7 @@ void AlgorithmSolver::construct_path() {
                     oldPath.m_routeLenPerLevel.cend(),
                     std::back_inserter(newRouteDistance));
 
+          // Check if admissible
           bool admissible = true;
           for (unsigned i = 0;
                i < current.m_pathVertices.size() && admissible == true;
@@ -292,6 +340,7 @@ void AlgorithmSolver::construct_path() {
           }
 
           if (admissible == true) {
+            // Create a new path
             Path newPath = current;
             newPath.m_pathVertices.insert(newPath.m_pathVertices.cend(),
                                           newPathNodes.cbegin(),
@@ -306,15 +355,21 @@ void AlgorithmSolver::construct_path() {
                             n = n + lenLink + lenPath;
                           });
             open.push(std::move(newPath));
-          }
+          }   // if admissible == true
         }
       } else {
+        // In this case the node n is free and can be easly
+        // added to the current path
         Path newPath = current;
         apply_next_node_to_path(n, &newPath);
         open.push(std::move(newPath));
       }
-    }
-  }
+    }  // for all n in next
+  }  // while openList is not empty
+
+  // Is the open list is empty and no path has been found,
+  // return false
+  return false;
 }
 
 template<typename HeuristicT>
@@ -538,33 +593,14 @@ void AlgorithmSolver::parse_problem_dat(const std::string& filename) {
 
 int main(int argc, char *argv[]) {
   AlgorithmSolver algorithm;
-  algorithm.parse_problem_dat("pedibus_20.dat");
+  algorithm.parse_problem_dat("pedibus_300.dat");
   algorithm.compute_all_distances();
   std::ofstream file;
   file.open("coords20.csv");
   algorithm.write_on_csv_coordinate(&file);
   file.close();
 
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  algorithm.construct_path<AlgorithmSolver::Heuristic>();
-  
-  /*
-  path.m_pathVertices = {7};
-  path.m_routeLenPerLevel = {0};
-  algorithm.find_possible_next_nodes(path, &nexts);
-  algorithm.sort_heuristic_accordance<AlgorithmSolver::Heuristic>(
-      path.m_pathVertices.back(), &nexts);
-  algorithm.apply_next_node_to_path(nexts[3], &path);
-  algorithm.find_possible_next_nodes(path, &nexts);
-  algorithm.apply_next_node_to_path(2, &path);
-  */
+  algorithm.launchProblemSolver<AlgorithmSolver::Heuristic>();
 
   return 0;
 }
