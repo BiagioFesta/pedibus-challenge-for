@@ -47,12 +47,12 @@ class AlgorithmSolver {
       const auto& nearestDistance = mp_problem->m_distanceFromNearest;
 
       // Check whether v2 is in a existent path
-      bool v2_in_a_path_as_leaf = false;
+      bool v2_in_a_path_as_inner = false;
       bool v2_is_a_leaf = false;
       PairIndices indices;
       if (mp_problem->checkVertexIsInAPath(v2, &indices)) {
         if (indices.second != 0) {
-          v2_in_a_path_as_leaf = true;
+          v2_in_a_path_as_inner = true;
         } else {
           v2_is_a_leaf = true;
         }
@@ -64,7 +64,8 @@ class AlgorithmSolver {
 
       return ((m_A * nearestDistance[v2]) +
               (m_B * distanceMatrix[v1][v2]) +
-              (m_C * v2_in_a_path_as_leaf));
+              (m_C * v2_in_a_path_as_inner) +
+              (m_D * distanceMatrix[v2][SCHOOL_NODE]));
     }
 
     // m_A factor scale is the grade of isolation of a point
@@ -77,6 +78,9 @@ class AlgorithmSolver {
     // with a internal node in a existent path BUT is not a leaf
     RealNumber m_C = 100;
 
+    // m_D factor scale if v2 is near to school
+    RealNumber m_D = 0.4;
+
     const AlgorithmSolver* mp_problem;
   };
 
@@ -87,7 +91,7 @@ class AlgorithmSolver {
     }
 
     bool operator()(const VertexType& v1, const VertexType& v2) const {
-      return (*mp_h)(*mp_v, v1) >= (*mp_h)(*mp_v, v2);
+      return (*mp_h)(*mp_v, v1) > (*mp_h)(*mp_v, v2);
     }
 
     const VertexType* mp_v;
@@ -428,6 +432,7 @@ void AlgorithmSolver::find_possible_next_nodes(const Path& current_path,
                                                VectVertices* nexts) {
   /// This algorithm give a node should return all possibile next
   /// nodes.
+  assert(nexts != nullptr);
 
   /// Clean the output
   nexts->clear();
@@ -593,14 +598,16 @@ void AlgorithmSolver::parse_problem_dat(const std::string& filename) {
 
 int main(int argc, char *argv[]) {
   AlgorithmSolver algorithm;
-  algorithm.parse_problem_dat("pedibus_300.dat");
+  algorithm.parse_problem_dat("pedibus_80.dat");
   algorithm.compute_all_distances();
   std::ofstream file;
-  file.open("coords20.csv");
+  file.open("coords80.csv");
   algorithm.write_on_csv_coordinate(&file);
   file.close();
 
   algorithm.launchProblemSolver<AlgorithmSolver::Heuristic>();
+  std::cout << "Num Path found: " << algorithm.m_foundPaths.size() <<
+      std::endl;
 
   return 0;
 }
