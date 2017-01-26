@@ -33,13 +33,15 @@ bool ProblemState::compute_distances_starting_v(
     newDistances->reserve(mp_problem->m_numNodes);
   }
 
-  auto outedges_active_copy = m_out_edges_active_per_vertex;
+  const auto& outedges_active = m_out_edges_active_per_vertex;
 
   // Added additional edge if any
+  const VertexIndex* source;
+  const VertexIndex* target;
   if (added_edge != nullptr) {
-    const VertexIndex& source =
-      mp_problem->m_mapEdge_index2link.at(*added_edge).first;
-    outedges_active_copy[source].push_back(*added_edge);
+    source = &(mp_problem->m_mapEdge_index2link.at(*added_edge).first);
+    target = &(mp_problem->m_mapEdge_index2link.at(*added_edge).second);
+    assert(m_out_edges_active_per_vertex[*source].size() == 0);
   }
 
 
@@ -50,15 +52,21 @@ bool ProblemState::compute_distances_starting_v(
 
   // Fill the stack. Roll the path
   const std::vector<EdgeIndex>* outedges_top =
-      &(outedges_active_copy[path.top()]);
+      &(outedges_active[path.top()]);
 
   // Until the end of the path
-  while (outedges_top->size() != 0) {
-    assert(outedges_top->size() == 1);  // check there is only one out edge
+  while (outedges_top->size() != 0 ||
+         (added_edge != nullptr ? path.top() == *source : false)) {
+    assert(outedges_top->size() == 1 ||
+           (added_edge != nullptr &&
+            path.top() == *source ?
+            true : false));  // check there is only one out edge
 
     // Get the next step in the path
     const VertexIndex& next_node =
-        mp_problem->m_mapEdge_index2link.at((*outedges_top)[0]).second;
+        ((added_edge != nullptr) && (path.top() == *source) ?
+         *target :
+         mp_problem->m_mapEdge_index2link.at((*outedges_top)[0]).second);
 
     // Push the internal distance
     distances.push(mp_problem->m_distance_matrix[path.top()][next_node]);
@@ -67,7 +75,7 @@ bool ProblemState::compute_distances_starting_v(
     path.push(next_node);
 
     // get the out edges of new top of the stack
-    outedges_top = &(outedges_active_copy[path.top()]);
+    outedges_top = &(outedges_active[path.top()]);
   }
 
   // Unroll the stack
