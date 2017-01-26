@@ -10,10 +10,32 @@ class ProblemState {
   /// @complexity O(|V|)
   explicit ProblemState(const ProblemDatas& problem) noexcept;
 
+  /// @brief Compute all possibile next states from the current state
+  /// @param [out] out_states  A container of state
+  /// @note The container will not be cleaned! New states will be added
+  /// to the container
+  template<typename StateContainer>
+  void compute_all_possibile_admissible_states(
+      StateContainer* out_states) const noexcept;
+
+  /// @brief Compute next state with the outgoing arc from v
+  /// starting from the current state
+  /// @param [in] v            A vertex you want to explode
+  /// @param [out] out_states  A container of state
+  /// @note The container will not be cleaned! New states will be added
+  /// to the container
+  template<typename StateContainer>
+  void compute_admissible_states_with_source(
+      const VertexIndex& v, StateContainer* out_states) const noexcept;
+
   template<typename EdgesContainer>
   void compute_all_possibile_admissible_edges(
       EdgesContainer* out_edges) const noexcept;
-  
+
+  template<typename EdgesContainer>
+  void compute_admissible_edges_with_source(
+      const VertexIndex& v, EdgesContainer* out_edges) const noexcept;
+
   /// @param [in] e    The edge you want to add to the state
   /// @return 'true' if the edge has been correcly added. 'false' in case that
   /// edge was already active
@@ -27,10 +49,6 @@ class ProblemState {
   /// @note admissibile not implies complete
   inline bool is_admissible() const noexcept;
 
-  template<typename EdgesContainer>
-  void compute_admissible_edges_with_source(
-      const VertexIndex& v, EdgesContainer* out_edges) const noexcept;
-  
  public:
   const ProblemDatas* mp_problem;
 
@@ -119,12 +137,54 @@ inline void ProblemState::find_roots_path_with(
   }
 }
 
+template<typename StateContainer>
+void ProblemState::compute_all_possibile_admissible_states(
+    StateContainer* out_states) const noexcept {
+  assert(out_states != nullptr);
+
+  // Compute all admissible edges from this state
+  std::vector<EdgeIndex> admissible_edges;
+  compute_all_possibile_admissible_edges(&admissible_edges);
+
+  auto insert = std::inserter(*out_states, out_states->end());
+  ProblemState new_state(*mp_problem);
+
+  // Insert all admissible edges as new states
+  for (const auto& e : admissible_edges) {
+    new_state = *this;
+    bool added = new_state.add_admissible_edge(e);
+    assert(added == true);
+    insert = std::move(new_state);
+  }
+}
+
+template<typename StateContainer>
+void ProblemState::compute_admissible_states_with_source(
+    const VertexIndex& v, StateContainer* out_states) const noexcept {
+    assert(out_states != nullptr);
+
+  // Compute all admissible edges from this state
+  std::vector<EdgeIndex> admissible_edges;
+  compute_admissible_edges_with_source(v, &admissible_edges);
+
+  auto insert = std::inserter(*out_states, out_states->end());
+  ProblemState new_state(*mp_problem);
+
+  // Insert all admissible edges as new states
+  for (const auto& e : admissible_edges) {
+    new_state = *this;
+    bool added = new_state.add_admissible_edge(e);
+    assert(added == true);
+    insert = std::move(new_state);
+  }
+}
+
 template<typename EdgesContainer>
 void ProblemState::compute_all_possibile_admissible_edges(
     EdgesContainer* out_edges) const noexcept {
   assert(out_edges != nullptr);
   out_edges->clear();
-  
+
   auto insert = std::inserter(*out_edges, out_edges->end());
   for (unsigned i = 0; i < m_active_edges.size(); ++i) {
     if (m_active_edges[i] == false) {

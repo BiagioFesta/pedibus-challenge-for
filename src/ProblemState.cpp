@@ -23,6 +23,8 @@ bool ProblemState::compute_distances_starting_v(
     const EdgeIndex* added_edge,
     std::vector<std::pair<VertexIndex, RealNumber>>* newDistances)
     const noexcept {
+  // TODO(biagio): this function could be recursive
+  // maybe check for performances
   assert(mp_problem != nullptr);
   assert(m_out_edges_active_per_vertex.size() == mp_problem->m_numNodes);
 
