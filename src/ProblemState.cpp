@@ -9,6 +9,7 @@ ProblemState::ProblemState(const ProblemDatas& problem) noexcept :
     mp_problem(&problem),
     m_active_edges(problem.m_numEdges, false),
     m_walk_distance_per_vertex(problem.m_numNodes, 0),
+    m_cosangle_path_per_vertex(problem.m_numNodes, COSANGLE_NOT_DEFINED),
     m_out_edges_active_per_vertex(problem.m_numNodes),
     m_in_edges_active_per_vertex(problem.m_numNodes),
     m_reachableVertices_per_vertex(problem.m_numNodes) {
@@ -183,6 +184,9 @@ bool ProblemState::add_admissible_edge(const EdgeIndex& e) {
   // Active edge
   m_active_edges[e] = true;
 
+  // Set as last edge added
+  m_last_added_edge = e;
+
   // Add vertices in linked list
   m_linked_vertices.insert(source);
   m_linked_vertices.insert(target);
@@ -202,6 +206,16 @@ bool ProblemState::add_admissible_edge(const EdgeIndex& e) {
     assert(v != source);
     reachable_vertices.insert(v);
   }
+  std::for_each(
+      m_reachableVertices_per_vertex.begin(),
+      m_reachableVertices_per_vertex.end(),
+      [&source, this] (std::set<VertexIndex>& reach) {
+        if (reach.find(source) != reach.cend()) {
+          for (const auto& v : m_reachableVertices_per_vertex[source]) {
+            reach.insert(v);
+          }
+        }
+      });
 
   // Get roots of path
   std::vector<VertexIndex> roots_for_source;
@@ -211,6 +225,10 @@ bool ProblemState::add_admissible_edge(const EdgeIndex& e) {
   for (const auto& r : roots_for_source) {
     update_walk_distance_from_vertex(r);
   }
+
+  // update cos angle path of source
+  m_cosangle_path_per_vertex[source] = compute_cosangle_path(
+      source, target);
 
   assert(is_admissible() == true);
 

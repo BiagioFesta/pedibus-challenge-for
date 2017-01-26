@@ -43,4 +43,8 @@ using HashMapPair = HashMap<Key, T, HashPair>;
 
 static constexpr VertexIndex SCHOOL_INDEX = 0;
 
+using Coordinate = int;
+
+constexpr RealNumber COSANGLE_NOT_DEFINED = 2; 
+  
 #endif  // __FOR_CH_TYPE_UTILITY_HPP

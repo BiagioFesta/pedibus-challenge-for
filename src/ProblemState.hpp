@@ -2,6 +2,7 @@
 #ifndef __FOR_CH_PROBLEM_STATE__HPP
 #define __FOR_CH_PROBLEM_STATE__HPP
 #include <iterator>
+#include <cmath>
 #include "ProblemDatas.hpp"
 
 class ProblemState {
@@ -49,6 +50,8 @@ class ProblemState {
   /// @note admissibile not implies complete
   inline bool is_admissible() const noexcept;
 
+  inline const EdgeIndex& last_added_edge() const noexcept;
+
  public:
   const ProblemDatas* mp_problem;
 
@@ -59,8 +62,14 @@ class ProblemState {
   std::set<VertexIndex> m_linked_vertices;
   //void compute_linked_vertices_set();
 
+  /// The last edge added
+  EdgeIndex m_last_added_edge;
+
   /// @note size of this vector should always be num_nodes of problem
   std::vector<RealNumber> m_walk_distance_per_vertex;
+
+  /// @note size of this vector should always be num_nodes of problem
+  std::vector<RealNumber> m_cosangle_path_per_vertex;
 
   /// @note size of this vector should always be num_nodes of problem
   std::vector<std::vector<EdgeIndex>> m_out_edges_active_per_vertex;
@@ -90,7 +99,15 @@ class ProblemState {
       const VertexIndex& v,
       const EdgeIndex* added_edge,
       std::vector<std::pair<VertexIndex, RealNumber>>* newDistances) const noexcept;
+
+  inline RealNumber compute_cosangle_path(const VertexIndex& source,
+                                          const VertexIndex& target) const noexcept;
 };
+
+inline const EdgeIndex& ProblemState::last_added_edge() const noexcept {
+  assert(m_linked_vertices.size() > 0);
+  return m_last_added_edge;
+}
 
 inline bool ProblemState::is_complete() const noexcept {
   assert(mp_problem != nullptr);
@@ -216,6 +233,31 @@ void ProblemState::compute_admissible_edges_with_source(
       }
     }
   }
+}
+
+inline RealNumber ProblemState::compute_cosangle_path(
+    const VertexIndex& source, const VertexIndex& target) const noexcept {
+  assert(mp_problem != nullptr);
+
+  // Check the edge has been actived
+  assert(m_active_edges[
+      mp_problem->m_mapEdge_link2index.at(std::make_pair(source, target))]
+         == true);
+
+  const Coordinate nx = mp_problem->m_coordX_vertices[SCHOOL_INDEX] -
+      mp_problem->m_coordX_vertices[source];
+  const Coordinate ny = mp_problem->m_coordY_vertices[SCHOOL_INDEX] -
+      mp_problem->m_coordY_vertices[source];
+  const Coordinate px = mp_problem->m_coordX_vertices[target] -
+      mp_problem->m_coordX_vertices[source];
+  const Coordinate py = mp_problem->m_coordY_vertices[target] -
+      mp_problem->m_coordY_vertices[source];
+
+  RealNumber num = (nx * px) + (ny * py);
+  RealNumber den = std::sqrt(nx * nx + ny * ny) *
+      std::sqrt(px * px + py * py);
+
+  return num/den;
 }
 
 #endif  // __FOR_CH_PROBLEM_STATE__HPP
