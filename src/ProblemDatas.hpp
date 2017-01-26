@@ -19,10 +19,10 @@ class ProblemDatas {
   std::vector<RealNumber> m_max_distances;
   std::vector<RealNumber> m_distances_FromNearest;
 
-  Map<EdgeIndex, EdgeLink> m_mapEdge_index2link;
-  Map<EdgeLink, EdgeIndex> m_mapEdge_link2index;
-  Map<VertexIndex, std::set<EdgeIndex>> m_map_vertex2outedges;
-  Map<VertexIndex, std::set<EdgeIndex>> m_map_vertex2inedges;
+  HashMap<EdgeIndex, EdgeLink> m_mapEdge_index2link;
+  HashMapPair<EdgeLink, EdgeIndex> m_mapEdge_link2index;
+  HashMap<VertexIndex, std::set<EdgeIndex>> m_map_vertex2outedges;
+  HashMap<VertexIndex, std::set<EdgeIndex>> m_map_vertex2inedges;
 
   template<typename T>
   static std::vector<T> parse_vector_dat(std::string vector_data);
