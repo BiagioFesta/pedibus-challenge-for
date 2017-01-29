@@ -1,7 +1,6 @@
 // Copyright 2017 <Biagio Festa>
 #ifndef __FOR_CH__GA_SOLVER__HPP
 #define __FOR_CH__GA_SOLVER__HPP
-#undef GALIB_USE_BORLAND_INST
 #include <ga/ga.h>
 #include <memory>
 #include <algorithm>
@@ -19,7 +18,7 @@ class GASolver {
   using Genome = GA1DBinaryStringGenome;
   using Clock = std::chrono::system_clock;
   using TimePoint = Clock::time_point;
-  
+
   enum FeasibilityStatus {
     FEASIBLE,
     NOTF_CYCLES,
@@ -32,7 +31,7 @@ class GASolver {
   const float m_pCrossover = 0.85f;
   const float m_pMutation = 0.5f;
   const unsigned m_sizePopulation = 10;
-  
+
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;
   bool m_displayInfo = false;
@@ -41,6 +40,9 @@ class GASolver {
 
   void print_current_ga_state(const GAGeneticAlgorithm& ga,
                               std::ostream* os) const noexcept;
+
+  void print_ga_parameters(const GAGeneticAlgorithm& ga,
+                          std::ostream* os) const noexcept;
 
   template<typename BinaryGenome>
   void init_genome_w_trivial_solution(BinaryGenome* genome) const noexcept;

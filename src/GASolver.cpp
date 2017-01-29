@@ -44,12 +44,15 @@ void GASolver::run(int argc, char** argv) {
   ga.scoreFrequency(1);
   ga.flushFrequency(10);
 
-  // ga.parameters(argc, argv);
+  // Override parameters from cmd
+  ga.parameters(argc, argv);
 
   // Set the start time
   m_time_start = Clock::now();
 
   // Run algorithm
+  print_ga_parameters(ga, &std::cout);
+
   if (m_displayInfo == true) {
     while (ga.done() != gaTrue) {
       print_current_ga_state(ga, &std::cout);
@@ -81,6 +84,7 @@ int GASolver::ga_genome_mutator(GAGenome& g, float mp) noexcept {
   Genome& genome = (Genome&) g;
   return mps_running_solver->mutator_genome<Genome>(&genome, mp);
 }
+
 GABoolean GASolver::ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept {
   using Resolution = std::chrono::seconds;
 
@@ -96,6 +100,21 @@ GABoolean GASolver::ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept {
   }
 
   return gaFalse;
+}
+
+void GASolver::print_ga_parameters(const GAGeneticAlgorithm& ga,
+                                  std::ostream* os) const noexcept {
+  assert(os != nullptr);
+  *os << "----------------------------------------\n"
+      << "GENETIC ALGORITHM PARAMETERS:\n"
+      << "Population Size: " << ga.populationSize() << "\n"
+      << "Num. Generations: " << ga.nGenerations() << "\n"
+      << "Num. Convergence: " << ga.nConvergence() << "\n"
+      << "Prob. Convergence: " << ga.pConvergence() << "\n"
+      << "Prob. Mutation: " << ga.pMutation() << "\n"
+      << "Prob. Crossover: " << ga.pCrossover() << "\n"
+      << "-----------------------------------------\n";
+  os->flush();
 }
 
 }  // namespace for_ch
