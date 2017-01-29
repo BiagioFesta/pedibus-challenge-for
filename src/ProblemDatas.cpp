@@ -7,6 +7,8 @@
 #include <set>
 #include "ProblemDatas.hpp"
 
+namespace for_ch {
+
 void ProblemDatas::parse_problem_dat(const std::string& filename) {
   constexpr unsigned BUFFER_SIZE = 1024 * 1024;
 
@@ -145,3 +147,5 @@ void ProblemDatas::compute_edges_indices() {
   assert(m_map_vertex2outedges.size() == m_numNodes);
   assert(m_map_vertex2inedges.size() == m_numNodes);
 }
+
+}  // namespace for_ch

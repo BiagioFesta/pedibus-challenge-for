@@ -6,6 +6,8 @@
 #include <set>
 #include "TypeUtility.hpp"
 
+namespace for_ch {
+
 class ProblemDatas {
  public:
   void parse_problem_dat(const std::string& filename);
@@ -52,6 +54,8 @@ std::vector<T> ProblemDatas::parse_vector_dat(std::string vector_data) {
   }
   return rtn;
 }
+
+}  // namespace for_ch
 
 
 #endif  // __FOR_CH_PROBLEM_DATAS__HPP
