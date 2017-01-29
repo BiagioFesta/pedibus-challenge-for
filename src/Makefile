@@ -4,7 +4,7 @@ GA_DIR=galib247
 GA_INCLUDE_DIR=$(GA_DIR)
 GA_LIB_DIR=$(GA_DIR)/ga
 CXX=g++
-CXXFLAGS=-std=c++11 -O3 -DNDEBUG
+CXXFLAGS=-std=c++11 -O0 -g -Wall
 CXXFLAGS_GA_LIB=-O3 -DNDEBUG -fpermissive -w
 LDFLAGS=-L$(GA_LIB_DIR) -lga -lgsl -lgslcblas -lm
 OUTPUT=for-ch_solver
