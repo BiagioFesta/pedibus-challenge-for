@@ -5,6 +5,7 @@ GA_INCLUDE_DIR=$(GA_DIR)
 GA_LIB_DIR=$(GA_DIR)/ga
 CXX=g++
 CXXFLAGS=-g -O0 -Wall
+CXXFLAGS_GA_LIB=-O3 -DNDEBUG -fpermissive -w
 LDFLAGS=-L$(GA_LIB_DIR) -lga -lgsl -lgslcblas -lm
 OUTPUT=for-ch_solver
 
@@ -16,7 +17,7 @@ for-ch_solver: ga-lib for-ch.cpp GASolver.cpp GASolver.hpp ProblemDatas.cpp \
 		for-ch.cpp GASolver.cpp ProblemDatas.cpp $(LDFLAGS)
 
 ga-lib:
-	cd $(GA_DIR); make lib CXXFLAGS="-g -O0 -fpermissive"
+	cd $(GA_DIR); make lib CXXFLAGS="$(CXXFLAGS_GA_LIB)"
 
 clean:
 	cd $(GA_DIR); make clean
