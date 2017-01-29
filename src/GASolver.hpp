@@ -32,10 +32,10 @@ class GASolver {
     NOTF_NOT_REACH_SCHOOL
   };
 
-  /// Default parameters genetic algorithm
-  const float m_pCrossover = 0.85f;
-  const float m_pMutation = 0.05f;
-  const unsigned m_sizePopulation = 30;
+  /// parameters genetic algorithm
+  float m_pCrossover = 0.85f;
+  float m_pMutation = 0.05f;
+  unsigned m_sizePopulation = 30;
 
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;
@@ -44,7 +44,8 @@ class GASolver {
   bool m_custom_crossover = false;
   TimePoint m_time_start;
 
-
+  void set_default_parameter() noexcept;
+  
   void print_current_ga_state(const GAGeneticAlgorithm& ga,
                               std::ostream* os) const noexcept;
 

@@ -28,6 +28,9 @@ void GASolver::run(int argc, char** argv, const std::vector<bool>* hint) {
   // Initalize Random seeds
   GARandomSeed();
 
+  // Set default parameters
+  set_default_parameter();
+
   // Initialize a genome
   Genome genome(num_edges, &GASolver::ga_genome_fitness);
   genome.initializer(&GASolver::ga_genome_init);
@@ -150,6 +153,19 @@ void GASolver::print_ga_parameters(const GAGeneticAlgorithm& ga,
       << "Custom Crossover: " << m_custom_crossover << "\n"
       << "-----------------------------------------\n";
   os->flush();
+}
+
+void GASolver::set_default_parameter() noexcept {
+  const unsigned num_nodes = mp_problem->m_numNodes;
+  if (num_nodes <= 11) {
+    m_pCrossover = 0.9f;
+    m_pMutation = 0.05f;
+    m_sizePopulation = 10;
+  } else if (num_nodes <= 101) {
+    m_pCrossover = 0.9f;
+    m_pMutation = 0.05f;
+    m_sizePopulation = 4;
+  }
 }
 
 }  // namespace for_ch

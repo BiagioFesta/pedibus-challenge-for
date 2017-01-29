@@ -23,6 +23,20 @@ class HESolver {
   struct Heuristic {
     explicit Heuristic(const HESolver& solver) :
         mp_solver(&solver) {
+      const unsigned num_nodes = solver.mp_problem->m_numNodes;
+      if (num_nodes <= 11) {
+        m_current_config.m_A = 0.1;
+	m_current_config.m_B = 1;
+	m_current_config.m_C = 100;
+	m_current_config.m_D = 0.4;
+	m_current_config.m_E = 0.1;
+      } else if (num_nodes <= 101) {
+        m_current_config.m_A = 0.1;
+	m_current_config.m_B = 1;
+	m_current_config.m_C = 100;
+	m_current_config.m_D = 0.4;
+	m_current_config.m_E = 0.1;
+      }
     }
 
     RealNumber operator()(const VertexIndex& v1,
@@ -36,10 +50,18 @@ class HESolver {
       const auto& nearestDistance =
           mp_solver->mp_problem->m_distances_FromNearest;
 
-      int v1_SchoolNodeX= (mp_solver->mp_problem->m_coordX_vertices[SCHOOL_INDEX])-(mp_solver->mp_problem->m_coordX_vertices[v1]);
-      int v1_SchoolNodeY= (mp_solver->mp_problem->m_coordY_vertices[SCHOOL_INDEX])-(mp_solver->mp_problem->m_coordY_vertices[v1]);
-      int v1_v2X= (mp_solver->mp_problem->m_coordX_vertices[v2])-(mp_solver->mp_problem->m_coordX_vertices[v1]);
-	  int v1_v2Y= (mp_solver->mp_problem->m_coordY_vertices[v2])-(mp_solver->mp_problem->m_coordY_vertices[v1]);
+      int v1_SchoolNodeX =
+          (mp_solver->mp_problem->m_coordX_vertices[SCHOOL_INDEX])
+          - (mp_solver->mp_problem->m_coordX_vertices[v1]);
+      int v1_SchoolNodeY =
+          (mp_solver->mp_problem->m_coordY_vertices[SCHOOL_INDEX])
+          - (mp_solver->mp_problem->m_coordY_vertices[v1]);
+      int v1_v2X =
+          (mp_solver->mp_problem->m_coordX_vertices[v2])
+          - (mp_solver->mp_problem->m_coordX_vertices[v1]);
+      int v1_v2Y =
+          (mp_solver->mp_problem->m_coordY_vertices[v2])
+          - (mp_solver->mp_problem->m_coordY_vertices[v1]);
 
       // Check whether v2 is in a existent path
       bool v2_in_a_path_as_inner = false;
@@ -57,31 +79,34 @@ class HESolver {
         return 0;
       }
 
-      return ((m_A * nearestDistance[v2]) +
-              (m_B * distanceMatrix[v1][v2]) +
-              (m_C * v2_in_a_path_as_inner) +
-              (m_D * distanceMatrix[v2][SCHOOL_INDEX])+
-              (m_E * (distanceMatrix[v1][SCHOOL_INDEX])*
-               ((v1_SchoolNodeX*v1_v2X + v1_SchoolNodeY*v1_v2Y)/(distanceMatrix[v1][SCHOOL_INDEX]*distanceMatrix[v1][v2])))
-               );
+      return ((m_current_config.m_A * nearestDistance[v2]) +
+              (m_current_config.m_B * distanceMatrix[v1][v2]) +
+              (m_current_config.m_C * v2_in_a_path_as_inner) +
+              (m_current_config.m_D * distanceMatrix[v2][SCHOOL_INDEX]) +
+              (m_current_config.m_E * (distanceMatrix[v1][SCHOOL_INDEX]) *
+               ((v1_SchoolNodeX * v1_v2X + v1_SchoolNodeY * v1_v2Y) /
+                (distanceMatrix[v1][SCHOOL_INDEX] * distanceMatrix[v1][v2]))));
     }
 
-    // m_A factor scale is the grade of isolation of a point
-    RealNumber m_A = 0.1;
+    struct CoefParam {
+      // m_A factor scale is the grade of isolation of a point
+      RealNumber m_A = 0.1;
 
-    // m_B factor scale of distance from the evaluator point
-    RealNumber m_B = 1.0;
+      // m_B factor scale of distance from the evaluator point
+      RealNumber m_B = 1.0;
 
-    // m_C factor scale if v2 is already in a path (we don't want to link
-    // with a internal node in a existent path BUT is not a leaf
-    RealNumber m_C = 100;
+      // m_C factor scale if v2 is already in a path (we don't want to link
+      // with a internal node in a existent path BUT is not a leaf
+      RealNumber m_C = 100;
 
-    // m_D factor scale if v2 is near to school
-    RealNumber m_D = 0.4;
+      // m_D factor scale if v2 is near to school
+      RealNumber m_D = 0.4;
 
-    RealNumber m_E = 0;
+      RealNumber m_E = 0.1;
+    };
 
     const HESolver* mp_solver;
+    CoefParam m_current_config;
   };
 
   template<typename HeuristicT>
@@ -97,7 +122,7 @@ class HESolver {
     const VertexIndex* mp_v;
     const HeuristicT* mp_h;
   };
-  
+
   std::shared_ptr<ProblemDatas> mp_problem;
   std::vector<Path> m_foundPaths;
   std::set<VertexIndex> m_linkedVertices;
@@ -111,7 +136,7 @@ class HESolver {
   ///                            vertices you can properly add to that path.
   void find_possible_next_nodes(const Path& current_path,
                                 std::vector<VertexIndex>* nexts);
-  
+
   /// This method takes a vertex and adds it to a path
   /// @param [in] v                 The vertex you want to add to the path
   /// @param [in.out] current_path  The path you want to modify
@@ -160,7 +185,7 @@ bool HESolver::construct_path() {
   using OpenList = std::stack<Path>;
 
   const unsigned num_nodes = mp_problem->m_numNodes;
-  
+
   // Get the list of free vertices (not already linked)
   std::vector<VertexIndex> freeVertices;
   std::vector<RealNumber> distancesFree;
