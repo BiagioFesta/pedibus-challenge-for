@@ -65,9 +65,19 @@ class GASolver {
   template<typename BinaryGenome>
   float evaluator_genome(const BinaryGenome& genome) const noexcept;
 
+  template<typename BinaryGenome>
+  int crossover_genome(const BinaryGenome& dad,
+                       const BinaryGenome& mom,
+                       BinaryGenome* bro,
+                       BinaryGenome* sis) const noexcept;
+
   static void ga_genome_init(GAGenome& g) noexcept;
   static float ga_genome_fitness(GAGenome& g) noexcept;
   static int ga_genome_mutator(GAGenome& g, float mp) noexcept;
+  static int ga_genome_crossover(const GAGenome& dad,
+                                 const GAGenome& mom,
+                                 GAGenome* bro,
+                                 GAGenome* sis) noexcept;
   static GABoolean ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept;
 };  // class GASolver
 
@@ -324,6 +334,14 @@ float GASolver::evaluator_genome(const BinaryGenome& genome) const noexcept {
   // This line should never be reached
   assert(false);
   return fitness;
+}
+
+template<typename BinaryGenome>
+int GASolver::crossover_genome(const BinaryGenome& dad,
+                               const BinaryGenome& mom,
+                               BinaryGenome* bro,
+                               BinaryGenome* sis) const noexcept {
+  assert(false);
 }
 
 }

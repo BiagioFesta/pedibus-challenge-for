@@ -76,13 +76,28 @@ void GASolver::ga_genome_init(GAGenome& g) noexcept {
   Genome& genome = (Genome&) g;
   mps_running_solver->init_genome_w_trivial_solution<Genome>(&genome);
 }
+
 float GASolver::ga_genome_fitness(GAGenome& g) noexcept {
   Genome& genome = (Genome&) g;
   return mps_running_solver->evaluator_genome<Genome>(genome);
 }
+
 int GASolver::ga_genome_mutator(GAGenome& g, float mp) noexcept {
   Genome& genome = (Genome&) g;
   return mps_running_solver->mutator_genome<Genome>(&genome, mp);
+}
+
+int GASolver::ga_genome_crossover(const GAGenome& dad,
+                                  const GAGenome& mom,
+                                  GAGenome* bro,
+                                  GAGenome* sis) noexcept {
+  Genome& genome_dad = (Genome&) dad;
+  Genome& genome_mom = (Genome&) mom;
+  Genome* genome_bro = reinterpret_cast<Genome*>(bro);
+  Genome* genome_sis = reinterpret_cast<Genome*>(sis);
+
+  return mps_running_solver->crossover_genome(genome_dad, genome_mom,
+                                              genome_bro, genome_sis);
 }
 
 GABoolean GASolver::ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept {
