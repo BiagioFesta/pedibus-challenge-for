@@ -20,6 +20,9 @@ void GASolver::run(int argc, char** argv) {
   // Get the numer of edges
   const unsigned num_edges = mp_problem->m_numEdges;
 
+  // Initalize Random seeds
+  GARandomSeed();
+
   // Initialize a genome
   Genome genome(num_edges, &GASolver::ga_genome_fitness);
   genome.initializer(&GASolver::ga_genome_init);
@@ -32,6 +35,7 @@ void GASolver::run(int argc, char** argv) {
   ga.set(gaNpMutation, m_pMutation);
   ga.set(gaNnGenerations, 100000);
   ga.minimize();
+  ga.initialize();
   ga.terminator(&GASolver::ga_algorithm_terminator);
 
   // Save log on disk
