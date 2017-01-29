@@ -2,11 +2,13 @@
 #include <tclap/CmdLine.h>
 #include <iostream>
 #include <memory>
+#include <vector>
 #include <map>
 #include <utility>
 #include <string>
 #include "ProblemDatas.hpp"
 #include "GASolver.hpp"
+#include "HESolver.hpp"
 
 #define _CMD_HEADER                                             \
   "Foundation Operational Research Challenge\n"                 \
@@ -73,6 +75,12 @@ void FORCH_Program::run(int argc, char** argv) {
   mp_problem = std::make_shared<for_ch::ProblemDatas>();
   mp_problem->parse_problem_dat(dat_filename);
 
-  for_ch::GASolver solver(mp_problem);
-  solver.run(argc, argv);
+  // First phase launch HESolver
+  std::vector<bool> he_solution;
+  for_ch::HESolver hesolver(mp_problem);
+  bool he_found = hesolver.run(&he_solution);
+
+  for_ch::GASolver gasolver(mp_problem);
+  gasolver.run(argc, argv,
+               (he_found == true ? &he_solution : nullptr));
 }

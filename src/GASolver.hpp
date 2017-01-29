@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <chrono>
+#include <vector>
 #include "ProblemDatas.hpp"
 
 namespace for_ch {
@@ -13,7 +14,7 @@ class GASolver {
  public:
   explicit GASolver(const std::shared_ptr<ProblemDatas>& problem) noexcept;
 
-  void run(int argc, char** argv);
+  void run(int argc, char** argv, const std::vector<bool>* hint);
  private:
   using Genome = GA1DBinaryStringGenome;
   using Clock = std::chrono::system_clock;
@@ -34,6 +35,7 @@ class GASolver {
 
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;
+  static const std::vector<bool>* mps_hint;
   bool m_displayInfo = false;
   TimePoint m_time_start;
 
@@ -46,6 +48,11 @@ class GASolver {
 
   template<typename BinaryGenome>
   void init_genome_w_trivial_solution(BinaryGenome* genome) const noexcept;
+
+  template<typename BinaryGenome>
+  void init_genome_w_solution(
+      BinaryGenome* genome,
+      const std::vector<bool>& solution) const noexcept;
 
   template<typename BinaryGenome>
   bool compute_walked_distances_from_end(
@@ -108,6 +115,23 @@ void GASolver::init_genome_w_trivial_solution(BinaryGenome* genome) const noexce
       }
     }  // for each edge of that node
   }  // for each node except school
+}
+
+template<typename BinaryGenome>
+void GASolver::init_genome_w_solution(
+    BinaryGenome* genome,
+    const std::vector<bool>& solution) const noexcept {
+  assert(genome);
+  assert(mp_problem != nullptr);
+  assert(SCHOOL_INDEX == 0);
+
+  const unsigned num_edges = mp_problem->m_numEdges;
+
+  for (EdgeIndex e = 0; e < num_edges; ++e) {
+    assert(e < solution.size());
+    assert(static_cast<int>(e) < genome->size());
+    genome->gene(e, solution[e]);
+  }
 }
 
 template<typename BinaryGenome>

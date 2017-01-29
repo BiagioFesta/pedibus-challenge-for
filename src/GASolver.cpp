@@ -1,17 +1,19 @@
 // Copyright 2017 <Biagio Festa>
 #include <memory>
 #include <cassert>
+#include <vector>
 #include "GASolver.hpp"
 
 namespace for_ch {
 
 const GASolver* GASolver::mps_running_solver = nullptr;
+const std::vector<bool>* GASolver::mps_hint = nullptr;
 
 GASolver::GASolver(const std::shared_ptr<ProblemDatas>& problem) noexcept :
     mp_problem(problem) {
 }
 
-void GASolver::run(int argc, char** argv) {
+void GASolver::run(int argc, char** argv, const std::vector<bool>* hint) {
   assert(argv != nullptr);
 
   // Set global pointer as this solver
@@ -19,6 +21,9 @@ void GASolver::run(int argc, char** argv) {
 
   // Get the numer of edges
   const unsigned num_edges = mp_problem->m_numEdges;
+
+  // Set hit if any
+  mps_hint = (hint != nullptr ? hint : nullptr);
 
   // Initalize Random seeds
   GARandomSeed();
@@ -78,7 +83,12 @@ void GASolver::print_current_ga_state(const GAGeneticAlgorithm& ga,
 
 void GASolver::ga_genome_init(GAGenome& g) noexcept {
   Genome& genome = (Genome&) g;
-  mps_running_solver->init_genome_w_trivial_solution<Genome>(&genome);
+  if (mps_hint != nullptr) {
+    mps_running_solver->init_genome_w_solution<Genome>(
+        &genome, *mps_hint);
+  } else {
+    mps_running_solver->init_genome_w_trivial_solution<Genome>(&genome);
+  }
 }
 
 float GASolver::ga_genome_fitness(GAGenome& g) noexcept {
