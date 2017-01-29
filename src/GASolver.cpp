@@ -32,6 +32,7 @@ void GASolver::run(int argc, char** argv, const std::vector<bool>* hint) {
   Genome genome(num_edges, &GASolver::ga_genome_fitness);
   genome.initializer(&GASolver::ga_genome_init);
   genome.mutator(&GASolver::ga_genome_mutator);
+  genome.crossover(&GASolver::ga_genome_crossover);
 
   // Initialize genetic algorithm
   GASimpleGA ga(genome);
@@ -105,13 +106,15 @@ int GASolver::ga_genome_crossover(const GAGenome& dad,
                                   const GAGenome& mom,
                                   GAGenome* bro,
                                   GAGenome* sis) noexcept {
+  assert(bro != nullptr);
+  assert(sis != nullptr);
   Genome& genome_dad = (Genome&) dad;
   Genome& genome_mom = (Genome&) mom;
-  Genome* genome_bro = reinterpret_cast<Genome*>(bro);
-  Genome* genome_sis = reinterpret_cast<Genome*>(sis);
+  Genome& genome_bro = dynamic_cast<Genome&>(*bro);
+  Genome& genome_sis = dynamic_cast<Genome&>(*sis);
 
   return mps_running_solver->crossover_genome(genome_dad, genome_mom,
-                                              genome_bro, genome_sis);
+                                              &genome_bro, &genome_sis);
 }
 
 GABoolean GASolver::ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept {

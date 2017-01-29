@@ -1,1 +1,8 @@
 *.o
+
+GPATH
+GRTAGS
+GTAGS
+
+src/galib247/ga/BUILD
+src/galib247/ga/libga.a
