@@ -1,7 +1,7 @@
 # Copyright 2017 <Biagio Festa>
 
 CXX=g++
-CXXFLAGS=-g -O0 -Wall
+CXXFLAGS=-std=c++11 -g -O0 -Wall
 
 all:
 	cd src; make CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"
