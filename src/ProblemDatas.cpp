@@ -22,23 +22,23 @@ void ProblemDatas::parse_problem_dat(const std::string& filename) {
   m_distances_FromNearest.clear();
 
   const auto lambda_parse_command = [this](std::string cmd) {
-    boost::trim(cmd);
+    trim_str(&cmd);
     size_t fin1, fin2;
 
     fin1 = cmd.find("param ");
     fin2 = cmd.find(":=");
     if (fin1 != std::string::npos) {
       auto param_name = cmd.substr(fin1 + 6, fin2 - fin1 - 6);
-      boost::trim(param_name);
+      trim_str(&param_name);
       param_name = param_name.substr(0, param_name.find(' '));
       if (param_name == "n") {
         std::string num_vertices = cmd.substr(fin2 + 2);
-        boost::trim(num_vertices);
+        trim_str(&num_vertices);
         m_numNodes = std::stoi(num_vertices) + 1;
         m_numEdges = std::pow(m_numNodes - 1, 2);
       } else if (param_name == "alpha") {
         std::string alpha = cmd.substr(fin2 + 2);
-        boost::trim(alpha);
+        trim_str(&alpha);
         m_alpha = stod(alpha);
       } else if (param_name == "coordX") {
         m_coordX_vertices.clear();
@@ -146,6 +146,15 @@ void ProblemDatas::compute_edges_indices() {
   assert(m_mapEdge_link2index.size() == m_numEdges);
   assert(m_map_vertex2outedges.size() == m_numNodes);
   assert(m_map_vertex2inedges.size() == m_numNodes);
+}
+
+void ProblemDatas::trim_str(std::string* str) {
+  const size_t first = str->find_first_not_of(" \r\n");
+  if (first != std::string::npos) {
+    const size_t last = str->find_last_not_of(" \r\n");
+    std::string tmp = str->substr(first, (last - first + 1));
+    *str = std::move(tmp);
+  }
 }
 
 }  // namespace for_ch

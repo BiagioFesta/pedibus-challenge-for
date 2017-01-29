@@ -4,6 +4,7 @@
 #undef GALIB_USE_BORLAND_INST
 #include <ga/ga.h>
 #include <memory>
+#include <algorithm>
 #include "ProblemDatas.hpp"
 
 namespace for_ch {
