@@ -362,7 +362,6 @@ incorporate it into the code base.
 // those affect us mostly with respect to the use of the std libraries.
 #elif defined(__GNUG__)
 #define GALIB_USE_RTTI
-#define GALIB_USE_BORLAND_INST
 #define GALIB_USE_STREAMS
 #define GALIB_USE_PID
 #define GALIB_USE_EMPTY_TEMPLATES
