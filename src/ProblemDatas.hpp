@@ -1,9 +1,9 @@
 // Copyright 2017 <Biagio Festa>
 #ifndef __FOR_CH_PROBLEM_DATAS__HPP
 #define __FOR_CH_PROBLEM_DATAS__HPP
-#include <boost/algorithm/string.hpp>
 #include <vector>
 #include <set>
+#include <string>
 #include "TypeUtility.hpp"
 
 namespace for_ch {
@@ -30,22 +30,23 @@ class ProblemDatas {
   static std::vector<T> parse_vector_dat(std::string vector_data);
   void compute_all_distances();
   void compute_edges_indices();
-};
 
+  static void trim_str(std::string* str);
+};
 
 template<typename T>
 std::vector<T> ProblemDatas::parse_vector_dat(std::string vector_data) {
   std::vector<T> rtn;
-  boost::trim(vector_data);
+  trim_str(&vector_data);
   while (vector_data.size()) {
     std::string line = vector_data.substr(0, vector_data.find('\n'));
     vector_data.erase(0, line.size() + 1);
-    boost::trim(line);
+    trim_str(&line);
     if (line.size()) {
       std::string index = line.substr(0, line.find(' '));
       std::string x = line.substr(line.find(' '));
-      boost::trim(index);
-      boost::trim(x);
+      trim_str(&index);
+      trim_str(&x);
       unsigned nindex = std::stoi(index);
       int nx = std::stoi(x);
       assert(nindex == rtn.size());
