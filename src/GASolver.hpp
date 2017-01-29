@@ -5,6 +5,7 @@
 #include <ga/ga.h>
 #include <memory>
 #include <algorithm>
+#include <chrono>
 #include "ProblemDatas.hpp"
 
 namespace for_ch {
@@ -16,6 +17,9 @@ class GASolver {
   void run(int argc, char** argv);
  private:
   using Genome = GA1DBinaryStringGenome;
+  using Clock = std::chrono::system_clock;
+  using TimePoint = Clock::time_point;
+  
   enum FeasibilityStatus {
     FEASIBLE,
     NOTF_CYCLES,
@@ -24,9 +28,16 @@ class GASolver {
     NOTF_NOT_REACH_SCHOOL
   };
 
+  /// Default parameters genetic algorithm
+  const float m_pCrossover = 0.85f;
+  const float m_pMutation = 0.5f;
+  const unsigned m_sizePopulation = 10;
+  
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;
   bool m_displayInfo = false;
+  TimePoint m_time_start;
+
 
   void print_current_ga_state(const GAGeneticAlgorithm& ga,
                               std::ostream* os) const noexcept;

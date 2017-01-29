@@ -27,13 +27,27 @@ void GASolver::run(int argc, char** argv) {
 
   // Initialize genetic algorithm
   GASimpleGA ga(genome);
-  ga.set(gaNpopulationSize, 10);
-  ga.set(gaNpCrossover, 1);
-  ga.set(gaNpMutation, 0.05);
+  ga.set(gaNpopulationSize, m_sizePopulation);
+  ga.set(gaNpCrossover, m_pCrossover);
+  ga.set(gaNpMutation, m_pMutation);
   ga.set(gaNnGenerations, 100000);
   ga.minimize();
-  // ga.terminator(&GASolver::ga_algorithm_terminator);
+  ga.terminator(&GASolver::ga_algorithm_terminator);
+
+  // Save log on disk
+  ga.scoreFilename("log_genetic.txt");
+  ga.selectScores(GAStatistics::Minimum |
+                  GAStatistics::Mean |
+                  GAStatistics::Maximum |
+                  GAStatistics::Deviation |
+                  GAStatistics::Diversity);
+  ga.scoreFrequency(1);
+  ga.flushFrequency(10);
+
   // ga.parameters(argc, argv);
+
+  // Set the start time
+  m_time_start = Clock::now();
 
   // Run algorithm
   if (m_displayInfo == true) {
@@ -68,6 +82,19 @@ int GASolver::ga_genome_mutator(GAGenome& g, float mp) noexcept {
   return mps_running_solver->mutator_genome<Genome>(&genome, mp);
 }
 GABoolean GASolver::ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept {
+  using Resolution = std::chrono::seconds;
+
+  const auto time_now = Clock::now();
+  const auto time_elapsed =
+      time_now - mps_running_solver->m_time_start;
+
+  const unsigned elapsed_count =
+      std::chrono::duration_cast<Resolution>(time_elapsed).count();
+
+  if (elapsed_count > 60 * 10) {  // 10 minutes
+    return gaTrue;
+  }
+
   return gaFalse;
 }
 
