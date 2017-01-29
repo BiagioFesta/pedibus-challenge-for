@@ -36,6 +36,11 @@ class HESolver {
       const auto& nearestDistance =
           mp_solver->mp_problem->m_distances_FromNearest;
 
+      int v1_SchoolNodeX= (mp_solver->mp_problem->m_coordX_vertices[SCHOOL_INDEX])-(mp_solver->mp_problem->m_coordX_vertices[v1]);
+      int v1_SchoolNodeY= (mp_solver->mp_problem->m_coordY_vertices[SCHOOL_INDEX])-(mp_solver->mp_problem->m_coordY_vertices[v1]);
+      int v1_v2X= (mp_solver->mp_problem->m_coordX_vertices[v2])-(mp_solver->mp_problem->m_coordX_vertices[v1]);
+	  int v1_v2Y= (mp_solver->mp_problem->m_coordY_vertices[v2])-(mp_solver->mp_problem->m_coordY_vertices[v1]);
+
       // Check whether v2 is in a existent path
       bool v2_in_a_path_as_inner = false;
       bool v2_is_a_leaf = false;
@@ -55,7 +60,10 @@ class HESolver {
       return ((m_A * nearestDistance[v2]) +
               (m_B * distanceMatrix[v1][v2]) +
               (m_C * v2_in_a_path_as_inner) +
-              (m_D * distanceMatrix[v2][SCHOOL_INDEX]));
+              (m_D * distanceMatrix[v2][SCHOOL_INDEX])+
+              (m_E * (distanceMatrix[v1][SCHOOL_INDEX])*
+               ((v1_SchoolNodeX*v1_v2X + v1_SchoolNodeY*v1_v2Y)/(distanceMatrix[v1][SCHOOL_INDEX]*distanceMatrix[v1][v2])))
+               );
     }
 
     // m_A factor scale is the grade of isolation of a point
@@ -70,6 +78,8 @@ class HESolver {
 
     // m_D factor scale if v2 is near to school
     RealNumber m_D = 0.4;
+
+    RealNumber m_E = 0;
 
     const HESolver* mp_solver;
   };
