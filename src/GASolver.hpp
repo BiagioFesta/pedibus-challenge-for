@@ -14,6 +14,10 @@ class GASolver {
  public:
   explicit GASolver(const std::shared_ptr<ProblemDatas>& problem) noexcept;
 
+  void set_flag_custom_crossover(bool flag) noexcept {
+    m_custom_crossover = flag;
+  }
+  
   void run(int argc, char** argv, const std::vector<bool>* hint);
  private:
   using Genome = GA1DBinaryStringGenome;
@@ -37,6 +41,7 @@ class GASolver {
   static const GASolver* mps_running_solver;
   static const std::vector<bool>* mps_hint;
   bool m_displayInfo = false;
+  bool m_custom_crossover = false;
   TimePoint m_time_start;
 
 

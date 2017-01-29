@@ -32,7 +32,9 @@ void GASolver::run(int argc, char** argv, const std::vector<bool>* hint) {
   Genome genome(num_edges, &GASolver::ga_genome_fitness);
   genome.initializer(&GASolver::ga_genome_init);
   genome.mutator(&GASolver::ga_genome_mutator);
-  genome.crossover(&GASolver::ga_genome_crossover);
+  if (m_custom_crossover) {
+    genome.crossover(&GASolver::ga_genome_crossover);
+  }
 
   // Initialize genetic algorithm
   GASimpleGA ga(genome);
@@ -145,6 +147,7 @@ void GASolver::print_ga_parameters(const GAGeneticAlgorithm& ga,
       << "Prob. Convergence: " << ga.pConvergence() << "\n"
       << "Prob. Mutation: " << ga.pMutation() << "\n"
       << "Prob. Crossover: " << ga.pCrossover() << "\n"
+      << "Custom Crossover: " << m_custom_crossover << "\n"
       << "-----------------------------------------\n";
   os->flush();
 }
