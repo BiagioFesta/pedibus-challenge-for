@@ -365,7 +365,26 @@ int GASolver::crossover_genome(const BinaryGenome& dad,
                                const BinaryGenome& mom,
                                BinaryGenome* bro,
                                BinaryGenome* sis) const noexcept {
-  assert(false);
+  assert(mp_problem != nullptr);
+  assert(bro != nullptr);
+  assert(sis != nullptr);
+
+  const unsigned num_nodes = mp_problem->m_numNodes;
+  const unsigned num_nodes_minusone = num_nodes - 1;
+  assert(num_nodes > 2);
+
+  int cross = GARandomInt(2, num_nodes_minusone);
+  EdgeIndex cross_edge = num_nodes_minusone * (cross - 1);
+
+  // Same len
+  assert(dad.size() == mom.size());
+
+  bro->copy(dad, 0, 0, cross_edge);
+  bro->copy(mom, cross_edge, cross_edge, dad.size() - cross_edge);
+  sis->copy(mom, 0, 0, cross_edge);
+  sis->copy(dad, cross_edge, cross_edge, dad.size() - cross_edge);
+
+  return 2;
 }
 
 }
