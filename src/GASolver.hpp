@@ -29,8 +29,8 @@ class GASolver {
 
   /// Default parameters genetic algorithm
   const float m_pCrossover = 0.85f;
-  const float m_pMutation = 0.5f;
-  const unsigned m_sizePopulation = 10;
+  const float m_pMutation = 0.05f;
+  const unsigned m_sizePopulation = 30;
 
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;
