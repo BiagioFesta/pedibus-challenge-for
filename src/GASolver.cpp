@@ -161,11 +161,43 @@ void GASolver::set_default_parameter() noexcept {
     m_pCrossover = 0.9f;
     m_pMutation = 0.05f;
     m_sizePopulation = 10;
-  } else if (num_nodes <= 101) {
+  } else if (num_nodes <= 21) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.002f;
+    m_sizePopulation = 4;
+  } else if (num_nodes <= 31) {
     m_pCrossover = 0.9f;
     m_pMutation = 0.05f;
     m_sizePopulation = 4;
-  }
+  } else if (num_nodes <= 51) {
+    m_pCrossover = 0.9f;
+    m_pMutation = 0.05f;
+    m_sizePopulation = 4;
+  } else if (num_nodes <= 81) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.02f;
+    m_sizePopulation = 6;
+  } else if (num_nodes <= 101) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.02f;
+    m_sizePopulation = 6;
+  } else if (num_nodes <= 151) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.04f;
+    m_sizePopulation = 6;
+  } else if (num_nodes <= 201) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.04f;
+    m_sizePopulation = 6;
+  } else if (num_nodes <= 251) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.02f;
+    m_sizePopulation = 12;
+  } else if (num_nodes <= 301) {
+    m_pCrossover = 0.7f;
+    m_pMutation = 0.04f;
+    m_sizePopulation = 6;
+  } 
 }
 
 }  // namespace for_ch
