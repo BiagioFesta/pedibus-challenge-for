@@ -18,7 +18,7 @@ class GASolver {
     m_custom_crossover = flag;
   }
   
-  void run(int argc, char** argv, const std::vector<bool>* hint);
+  std::vector<bool> run(int argc, char** argv, const std::vector<bool>* hint);
  private:
   using Genome = GA1DBinaryStringGenome;
   using Clock = std::chrono::system_clock;

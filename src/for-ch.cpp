@@ -65,11 +65,11 @@ void FORCH_Program::init_command_line_parse() {
   m_cmd_args.insert(std::make_pair("data", std::move(modelFile)));
 
   PTR_CmdArg custom_crossover(
-      new FlagArg("p",
-                  "custom-crossover",
-                  "Flag to use custom crossover function",
+      new FlagArg("z",
+                  "disable-custom-crossover",
+                  "Flag to DISABLE custom crossover function",
                   false));
-  m_cmd_args.insert(std::make_pair("personal-crossover",
+  m_cmd_args.insert(std::make_pair("disable-personal-crossover",
                                    std::move(custom_crossover)));
 
   for (const auto& arg : m_cmd_args) {
@@ -94,10 +94,19 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // Personal crossove flag
   for_ch::GASolver gasolver(mp_problem);
-  const bool& custom_crossover = dynamic_cast<FlagArg*>(
-      m_cmd_args.at("personal-crossover").get())->getValue();
-  gasolver.set_flag_custom_crossover(custom_crossover);
+  const bool& disable_custom_crossover = dynamic_cast<FlagArg*>(
+      m_cmd_args.at("disable-personal-crossover").get())->getValue();
+  gasolver.set_flag_custom_crossover(~disable_custom_crossover);
 
-  gasolver.run(argc, argv,
-               (he_found == true ? &he_solution : nullptr));
+  // Second pgase launch GASolver
+  std::vector<bool> ga_solution = gasolver.run(
+      argc, argv,
+      (he_found == true ? &he_solution : nullptr));
+
+  // Print solution
+  std::cout << "Solution:\n";
+  for (EdgeIndex e = 0; e < mp_problem->m_numEdges; ++e) {
+    assert(e < ga_solution.size());
+    std::cout << e << "\t" << ga_solution[e] << '\n';
+  }
 }

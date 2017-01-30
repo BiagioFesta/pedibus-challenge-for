@@ -13,7 +13,8 @@ GASolver::GASolver(const std::shared_ptr<ProblemDatas>& problem) noexcept :
     mp_problem(problem) {
 }
 
-void GASolver::run(int argc, char** argv, const std::vector<bool>* hint) {
+std::vector<bool> GASolver::run(
+    int argc, char** argv, const std::vector<bool>* hint) {
   assert(argv != nullptr);
 
   // Set global pointer as this solver
@@ -79,7 +80,17 @@ void GASolver::run(int argc, char** argv, const std::vector<bool>* hint) {
 
   const auto& result_stats = ga.statistics();
   const Genome& best_result = (const Genome&) result_stats.bestIndividual();
-  std::cout << best_result.score() << std::endl;
+
+  // Construct best solution
+  std::vector<bool> best_solution(mp_problem->m_numEdges, false);
+  for (EdgeIndex e = 0; e < mp_problem->m_numEdges; ++e) {
+    if (best_result.gene(e) == 1) {
+      assert(e < best_solution.size());
+      best_solution[e] = true;
+    }
+  }
+
+  return best_solution;
 }
 
 void GASolver::print_current_ga_state(const GAGeneticAlgorithm& ga,
@@ -197,7 +208,7 @@ void GASolver::set_default_parameter() noexcept {
     m_pCrossover = 0.7f;
     m_pMutation = 0.04f;
     m_sizePopulation = 6;
-  } 
+  }
 }
 
 }  // namespace for_ch
