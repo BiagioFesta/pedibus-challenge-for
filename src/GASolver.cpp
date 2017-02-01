@@ -143,7 +143,7 @@ GABoolean GASolver::ga_algorithm_terminator(GAGeneticAlgorithm & ga) noexcept {
   const unsigned elapsed_count =
       std::chrono::duration_cast<Resolution>(time_elapsed).count();
 
-  if (elapsed_count > 60 * 10) {  // 10 minutes
+  if (elapsed_count > mps_running_solver->m_timeMax_seconds) {  // 10 minutes
     return gaTrue;
   }
 
@@ -162,6 +162,7 @@ void GASolver::print_ga_parameters(const GAGeneticAlgorithm& ga,
       << "Prob. Mutation: " << ga.pMutation() << "\n"
       << "Prob. Crossover: " << ga.pCrossover() << "\n"
       << "Custom Crossover: " << m_custom_crossover << "\n"
+      << "Max time [s]: " << m_timeMax_seconds << "\n"
       << "-----------------------------------------\n";
   os->flush();
 }

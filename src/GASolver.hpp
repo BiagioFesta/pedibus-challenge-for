@@ -17,6 +17,10 @@ class GASolver {
   void set_flag_custom_crossover(bool flag) noexcept {
     m_custom_crossover = flag;
   }
+
+  void set_max_time_seconds(int seconds) noexcept {
+    m_timeMax_seconds = seconds;
+  }
   
   std::vector<bool> run(int argc, char** argv, const std::vector<bool>* hint);
  private:
@@ -36,6 +40,7 @@ class GASolver {
   float m_pCrossover = 0.85f;
   float m_pMutation = 0.05f;
   unsigned m_sizePopulation = 30;
+  unsigned m_timeMax_seconds = 10 * 60;  // 10 minutes
 
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;
