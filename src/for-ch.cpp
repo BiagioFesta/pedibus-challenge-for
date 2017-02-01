@@ -85,6 +85,14 @@ void FORCH_Program::init_command_line_parse() {
   m_cmd_args.insert(std::make_pair("time-genetic",
                                    std::move(seconds_max)));
 
+  PTR_CmdArg verbose(
+      new FlagArg("v",
+                  "verbose-output",
+                  "Flag to display verbose output",
+                  false));
+  m_cmd_args.insert(std::make_pair("verbose",
+                                   std::move(verbose)));
+
   for (const auto& arg : m_cmd_args) {
     m_cmd_parser.add(*(arg.second));
   }
@@ -97,6 +105,10 @@ void FORCH_Program::run(int argc, char** argv) {
   // Get parameter
   const std::string& dat_filename = dynamic_cast<StringArg*>(
         m_cmd_args.at("data").get())->getValue();
+  const bool verbose_output = dynamic_cast<FlagArg*>(
+      m_cmd_args.at("verbose").get())->getValue();
+
+  // Construct problem
   mp_problem = std::make_shared<for_ch::ProblemDatas>();
   mp_problem->parse_problem_dat(dat_filename);
 
@@ -113,6 +125,7 @@ void FORCH_Program::run(int argc, char** argv) {
       m_cmd_args.at("time-genetic").get())->getValue();
   gasolver.set_max_time_seconds(time);
   gasolver.set_flag_custom_crossover(~disable_custom_crossover);
+  gasolver.set_verbose(verbose_output);
 
   // Second pgase launch GASolver
   std::vector<bool> ga_solution = gasolver.run(

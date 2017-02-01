@@ -21,6 +21,10 @@ class GASolver {
   void set_max_time_seconds(int seconds) noexcept {
     m_timeMax_seconds = seconds;
   }
+
+  void set_verbose(bool flag) noexcept {
+    m_verbose = flag;
+  }
   
   std::vector<bool> run(int argc, char** argv, const std::vector<bool>* hint);
  private:
@@ -41,6 +45,7 @@ class GASolver {
   float m_pMutation = 0.05f;
   unsigned m_sizePopulation = 30;
   unsigned m_timeMax_seconds = 10 * 60;  // 10 minutes
+  bool m_verbose = false;
 
   std::shared_ptr<ProblemDatas> mp_problem;
   static const GASolver* mps_running_solver;

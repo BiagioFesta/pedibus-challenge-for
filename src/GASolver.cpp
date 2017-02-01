@@ -50,15 +50,17 @@ std::vector<bool> GASolver::run(
   ga.initialize();
   ga.terminator(&GASolver::ga_algorithm_terminator);
 
-  // Save log on disk
-  ga.scoreFilename("log_genetic.txt");
-  ga.selectScores(GAStatistics::Minimum |
-                  GAStatistics::Mean |
-                  GAStatistics::Maximum |
-                  GAStatistics::Deviation |
-                  GAStatistics::Diversity);
-  ga.scoreFrequency(1);
-  ga.flushFrequency(10);
+  // Save log on disk for verbose option
+  if (m_verbose) {
+    ga.scoreFilename("log_genetic.txt");
+    ga.selectScores(GAStatistics::Minimum |
+                    GAStatistics::Mean |
+                    GAStatistics::Maximum |
+                    GAStatistics::Deviation |
+                    GAStatistics::Diversity);
+    ga.scoreFrequency(1);
+    ga.flushFrequency(10);
+  }
 
   // Override parameters from cmd
   ga.parameters(argc, argv);
