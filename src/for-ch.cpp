@@ -24,6 +24,7 @@ class FORCH_Program {
  private:
   using PTR_CmdArg = std::unique_ptr<TCLAP::Arg>;
   using StringArg = TCLAP::ValueArg<std::string>;
+  using StringArgUnlabel = TCLAP::UnlabeledValueArg<std::string>;
   using FloatArg = TCLAP::ValueArg<float>;
   using IntArg = TCLAP::ValueArg<int>;
   using FlagArg = TCLAP::SwitchArg;
@@ -59,12 +60,11 @@ FORCH_Program::FORCH_Program() :
 
 void FORCH_Program::init_command_line_parse() {
   PTR_CmdArg modelFile(
-      new StringArg("d",
-                    "data-file",
-                    "The dat file which describes the problem data",
-                    true,
-                    "none",
-                    "string"));
+      new StringArgUnlabel("data-file",
+                           "The dat file which describes the problem data",
+                           true,
+                           "none",
+                           "string"));
   m_cmd_args.insert(std::make_pair("data", std::move(modelFile)));
 
   PTR_CmdArg custom_crossover(
@@ -133,8 +133,15 @@ void FORCH_Program::run(int argc, char** argv) {
       (he_found == true ? &he_solution : nullptr));
 
   // Print solution
-  std::string solution_filename =
-      dat_filename.substr(0, dat_filename.find_last_of('.')) + ".sol";
+  const std::string path_complete_binary = std::string(argv[0]);
+  const std::string path_binary = path_complete_binary.substr(
+      0, path_complete_binary.find_last_of('/'));
+  const std::string solution_filename =
+      path_binary + "/"
+      + dat_filename.substr(dat_filename.find_last_of('/') + 1,
+                            dat_filename.find_last_of('.') -
+                            dat_filename.find_last_of('/') - 1)
+      + ".sol";
   print_solution(solution_filename, ga_solution);
   std::cout << "Solution written in the file: '" << solution_filename << "'\n";
 }
