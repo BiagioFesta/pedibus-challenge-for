@@ -53,6 +53,7 @@ class GASolver {
   bool m_displayInfo = false;
   bool m_custom_crossover = false;
   TimePoint m_time_start;
+  float m_fitness_beta = 0.1f;;
 
   void set_default_parameter() noexcept;
   
@@ -74,13 +75,15 @@ class GASolver {
   bool compute_walked_distances_from_end(
       const BinaryGenome& genome,
       const VertexIndex end_path,
-      std::vector<RealNumber>* out_walked_distances) const noexcept;
+      std::vector<RealNumber>* out_walked_distances,
+      std::vector<RealNumber>* out_dangers) const noexcept;
 
   template<typename BinaryGenome>
   FeasibilityStatus is_feasible(
       const BinaryGenome& genome,
       unsigned* num_leaves,
-      std::vector<RealNumber>* out_walked_distances) const noexcept;
+      std::vector<RealNumber>* out_walked_distances,
+      std::vector<RealNumber>* out_dangers) const noexcept;
 
   template<typename BinaryGenome>
   int mutator_genome(BinaryGenome* genome, float pmut) const noexcept;
@@ -154,11 +157,14 @@ template<typename BinaryGenome>
 bool GASolver::compute_walked_distances_from_end(
     const BinaryGenome& genome,
     const VertexIndex end_path,
-    std::vector<RealNumber>* out_walked_distances) const noexcept {
+    std::vector<RealNumber>* out_walked_distances,
+    std::vector<RealNumber>* out_dangers) const noexcept {
   assert(out_walked_distances != nullptr);
+  assert(out_dangers != nullptr);
   assert(mp_problem != nullptr);
   assert(SCHOOL_INDEX == 0);
   assert(out_walked_distances->size() == mp_problem->m_numNodes);
+  assert(out_dangers->size() == mp_problem->m_numNodes);
 
   const unsigned num_nodes = mp_problem->m_numNodes;
   const unsigned num_nodes_minusone = num_nodes - 1;
@@ -181,17 +187,22 @@ bool GASolver::compute_walked_distances_from_end(
 
         if (target == end_path) {
           RealNumber& distance_n = (*out_walked_distances)[n];
+          RealNumber& dang_n = (*out_dangers)[n];
           const RealNumber& distance_t = (*out_walked_distances)[target];
+          const RealNumber& dang_t = (*out_dangers)[target];
 
           distance_n = mp_problem->m_distance_matrix[n][target] +
               distance_t;
+
+          dang_n = mp_problem->m_dangerousness_matrix[n][target] +
+              dang_t;
 
           if (distance_n > mp_problem->m_max_distances[n]) {
             return false;
           }
 
           if (compute_walked_distances_from_end(
-                  genome, n, out_walked_distances) == false) {
+                  genome, n, out_walked_distances, out_dangers) == false) {
             return false;
           }
         }
@@ -206,8 +217,10 @@ template<typename BinaryGenome>
 GASolver::FeasibilityStatus GASolver::is_feasible(
     const BinaryGenome& genome,
     unsigned* num_leaves,
-    std::vector<RealNumber>* out_walked_distances) const noexcept {
+    std::vector<RealNumber>* out_walked_distances,
+    std::vector<RealNumber>* out_dangers) const noexcept {
   assert(num_leaves != nullptr);
+  assert(out_dangers != nullptr);
   assert(out_walked_distances != nullptr);
   assert(mp_problem != nullptr);
   assert(SCHOOL_INDEX == 0);
@@ -293,7 +306,8 @@ GASolver::FeasibilityStatus GASolver::is_feasible(
   bool distance_constraint =
       compute_walked_distances_from_end(genome,
                                         SCHOOL_INDEX,
-                                        out_walked_distances);
+                                        out_walked_distances,
+                                        out_dangers);
 
   // Check distances constraint
   if (distance_constraint == false) {
@@ -354,10 +368,13 @@ float GASolver::evaluator_genome(const BinaryGenome& genome) const noexcept {
   const unsigned num_nodes = mp_problem->m_numNodes;
 
   std::vector<RealNumber> walked_distance(num_nodes);
+  std::vector<RealNumber> dangerousness(num_nodes);
   unsigned num_leaves;
   float fitness;
-
-  FeasibilityStatus status = is_feasible(genome, &num_leaves, &walked_distance);
+  RealNumber danger = 0;
+  
+  FeasibilityStatus status = is_feasible(genome, &num_leaves,
+                                         &walked_distance, &dangerousness);
   switch (status) {
     case NOTF_CYCLES:
       fitness = num_nodes * 10.f;
@@ -368,7 +385,10 @@ float GASolver::evaluator_genome(const BinaryGenome& genome) const noexcept {
       fitness = num_leaves + num_nodes;
       return fitness;
     case FEASIBLE:
-      fitness = num_leaves;
+      for (const auto& d : dangerousness) {
+        danger += d;
+      }
+      fitness = num_leaves + danger * m_fitness_beta;
       return fitness;
   }
   // This line should never be reached

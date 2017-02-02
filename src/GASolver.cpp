@@ -20,8 +20,11 @@ std::vector<bool> GASolver::run(
   // Set global pointer as this solver
   mps_running_solver = this;
 
-  // Get the numer of edges
+  // Get the number of edges
   const unsigned num_edges = mp_problem->m_numEdges;
+
+  // Get the number of nodes
+  const unsigned num_nodes_minusone = mp_problem->m_numNodes - 1;
 
   // Set hit if any
   mps_hint = (hint != nullptr ? hint : nullptr);
@@ -31,6 +34,15 @@ std::vector<bool> GASolver::run(
 
   // Set default parameters
   set_default_parameter();
+
+  // Initialize fintess beta
+  if (num_nodes_minusone > 10 && num_nodes_minusone <= 100) {
+    m_fitness_beta = 0.01;
+  } else if (num_nodes_minusone > 100 && num_nodes_minusone <= 1000) {
+    m_fitness_beta = 0.001;
+  } else if (num_nodes_minusone > 1000) {
+    m_fitness_beta = 0.0001;
+  }
 
   // Initialize a genome
   Genome genome(num_edges, &GASolver::ga_genome_fitness);
@@ -113,8 +125,10 @@ void GASolver::ga_genome_init(GAGenome& g) noexcept {
   unsigned temp_num_leaves;
   std::vector<RealNumber> temp_distances(
       mps_running_solver->mp_problem->m_numNodes);
+  std::vector<RealNumber> temp_dangers(
+      mps_running_solver->mp_problem->m_numNodes);
   assert(mps_running_solver->is_feasible<Genome>(
-      genome, &temp_num_leaves, &temp_distances) == FEASIBLE);
+      genome, &temp_num_leaves, &temp_distances, &temp_dangers) == FEASIBLE);
 #endif
 }
 
@@ -173,6 +187,7 @@ void GASolver::print_ga_parameters(const GAGeneticAlgorithm& ga,
       << "Prob. Crossover: " << ga.pCrossover() << "\n"
       << "Custom Crossover: " << m_custom_crossover << "\n"
       << "Max time [s]: " << m_timeMax_seconds << "\n"
+      << "Fitness Beta: " << m_fitness_beta << "\n"
       << "-----------------------------------------\n";
   os->flush();
 }
