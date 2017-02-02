@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <sstream>
 #include "TypeUtility.hpp"
 
 namespace for_ch {
@@ -20,6 +21,7 @@ class ProblemDatas {
   MatrixReal m_distance_matrix;
   std::vector<RealNumber> m_max_distances;
   std::vector<RealNumber> m_distances_FromNearest;
+  MatrixReal m_dangerousness_matrix;
 
   HashMap<EdgeIndex, EdgeLink> m_mapEdge_index2link;
   HashMapPair<EdgeLink, EdgeIndex> m_mapEdge_link2index;
@@ -28,6 +30,9 @@ class ProblemDatas {
 
   template<typename T>
   static std::vector<T> parse_vector_dat(std::string vector_data);
+  template<typename T>
+  static Matrix<T> parse_matrix_dat(std::string matrix_data);
+
   void compute_all_distances();
   void compute_edges_indices();
 
@@ -37,22 +42,71 @@ class ProblemDatas {
 template<typename T>
 std::vector<T> ProblemDatas::parse_vector_dat(std::string vector_data) {
   std::vector<T> rtn;
-  trim_str(&vector_data);
-  while (vector_data.size()) {
-    std::string line = vector_data.substr(0, vector_data.find('\n'));
-    vector_data.erase(0, line.size() + 1);
-    trim_str(&line);
-    if (line.size()) {
-      std::string index = line.substr(0, line.find(' '));
-      std::string x = line.substr(line.find(' '));
-      trim_str(&index);
-      trim_str(&x);
-      unsigned nindex = std::stoi(index);
-      int nx = std::stoi(x);
-      assert(nindex == rtn.size());
-      rtn.push_back(nx);
-    }
+  std::map<unsigned, T> map_vector;
+  std::istringstream sstream(vector_data);
+
+  unsigned index, value;
+  while (sstream.eof() == false) {
+    sstream >> index;
+    sstream >> value;
+    map_vector[index] = value;
   }
+
+#ifndef NDEBUG
+  index = 0;
+  for (const auto& p : map_vector) {
+    assert(p.first == index++);
+  }
+#endif
+
+  rtn.resize(map_vector.size());
+  for (const auto& p : map_vector) {
+    rtn[p.first] = p.second;
+  }
+
+  return rtn;
+}
+
+template<typename T>
+Matrix<T> ProblemDatas::parse_matrix_dat(std::string matrix_data) {
+  static constexpr unsigned SIZE_BUFFER = 1024 * 1024;
+  Matrix<T> rtn;
+  std::map<unsigned, RowMatrix<T>> map_matrix;
+  std::istringstream sstream(matrix_data);
+
+  unsigned index_row;
+  std::string line;
+  T value;
+  char buffer[SIZE_BUFFER];
+
+  while (sstream.eof() == false) {
+    sstream >> index_row;
+    sstream.getline(buffer, SIZE_BUFFER, '\n');
+    line = std::string(buffer, sstream.gcount() - 1);
+    trim_str(&line);
+
+    std::istringstream linestream(line);
+    RowMatrix<T> row;
+    while (linestream.eof() == false) {
+      linestream >> value;
+      row.push_back(value);
+    }
+
+    map_matrix[index_row] = std::move(row);
+  }
+
+#ifndef NDEBUG
+  index_row = 0;
+  for (const auto& p : map_matrix) {
+    assert(p.first == index_row++);
+  }
+#endif
+
+  rtn.resize(map_matrix.size());
+  for (const auto& p : map_matrix) {
+    rtn[p.first] = std::move(p.second);
+  }
+
   return rtn;
 }
 

@@ -52,6 +52,11 @@ void ProblemDatas::parse_problem_dat(const std::string& filename) {
         m_coordY_vertices =
             parse_vector_dat<decltype(m_coordY_vertices)::value_type>(
                 std::move(vector));
+      } else if (param_name == "d") {
+        m_dangerousness_matrix.clear();
+        std::string matrix = cmd.substr(fin2 + 2);
+        m_dangerousness_matrix =
+            parse_matrix_dat<RealNumber>(std::move(matrix));
       }
     }
   };
@@ -149,9 +154,9 @@ void ProblemDatas::compute_edges_indices() {
 }
 
 void ProblemDatas::trim_str(std::string* str) {
-  const size_t first = str->find_first_not_of(" \r\n");
+  const size_t first = str->find_first_not_of(" \r\n\t");
   if (first != std::string::npos) {
-    const size_t last = str->find_last_not_of(" \r\n");
+    const size_t last = str->find_last_not_of(" \r\n\t\0");
     std::string tmp = str->substr(first, (last - first + 1));
     *str = std::move(tmp);
   }
