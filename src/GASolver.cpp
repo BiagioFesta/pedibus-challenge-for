@@ -108,6 +108,12 @@ void GASolver::ga_genome_init(GAGenome& g) noexcept {
   } else {
     mps_running_solver->init_genome_w_trivial_solution<Genome>(&genome);
   }
+
+#ifndef NDEBUG
+  unsigned num_leaves;
+  assert(mps_running_solver->is_feasible<Genome>(
+      genome, &num_leaves, nullptr) == FEASIBLE);
+#endif
 }
 
 float GASolver::ga_genome_fitness(GAGenome& g) noexcept {
