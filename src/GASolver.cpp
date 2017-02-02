@@ -110,9 +110,11 @@ void GASolver::ga_genome_init(GAGenome& g) noexcept {
   }
 
 #ifndef NDEBUG
-  unsigned num_leaves;
+  unsigned temp_num_leaves;
+  std::vector<RealNumber> temp_distances(
+      mps_running_solver->mp_problem->m_numNodes);
   assert(mps_running_solver->is_feasible<Genome>(
-      genome, &num_leaves, nullptr) == FEASIBLE);
+      genome, &temp_num_leaves, &temp_distances) == FEASIBLE);
 #endif
 }
 
