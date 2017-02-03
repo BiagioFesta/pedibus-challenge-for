@@ -14,6 +14,32 @@ class HESolver {
   explicit HESolver(const std::shared_ptr<ProblemDatas>& problem) noexcept;
 
   bool run(std::vector<bool>* active_edges);
+
+  void set_param_a(RealNumber value) noexcept {
+    assert(0 < m_setCoef.size());
+    m_setCoef[0] = std::make_pair(true, value);
+  }
+
+  void set_param_b(RealNumber value) noexcept {
+    assert(1 < m_setCoef.size());
+    m_setCoef[1] = std::make_pair(true, value);
+  }
+
+  void set_param_c(RealNumber value) noexcept {
+    assert(2 < m_setCoef.size());
+    m_setCoef[2] = std::make_pair(true, value);
+  }
+
+  void set_param_d(RealNumber value) noexcept {
+    assert(3 < m_setCoef.size());
+    m_setCoef[3] = std::make_pair(true, value);
+  }
+
+  void set_param_e(RealNumber value) noexcept {
+    assert(4 < m_setCoef.size());
+    m_setCoef[4] = std::make_pair(true, value);
+  }
+  
  private:
   struct Path {
     std::vector<VertexIndex> m_pathVertices;
@@ -85,6 +111,24 @@ class HESolver {
 		m_current_config.m_D = 0.7;
 		m_current_config.m_E = 0;
       }
+
+      assert(mp_solver->m_setCoef.size() == 5);
+      if (mp_solver->m_setCoef[0].first == true) {
+        m_current_config.m_A = mp_solver->m_setCoef[0].second;
+      }
+      if (mp_solver->m_setCoef[1].first == true) {
+        m_current_config.m_B = mp_solver->m_setCoef[1].second;
+      }
+      if (mp_solver->m_setCoef[2].first == true) {
+        m_current_config.m_C = mp_solver->m_setCoef[2].second;
+      }
+      if (mp_solver->m_setCoef[3].first == true) {
+        m_current_config.m_D = mp_solver->m_setCoef[3].second;
+      }
+      if (mp_solver->m_setCoef[4].first == true) {
+        m_current_config.m_E = mp_solver->m_setCoef[4].second;
+      }
+      
     }
 
     RealNumber operator()(const VertexIndex& v1,
@@ -174,6 +218,7 @@ class HESolver {
   std::shared_ptr<ProblemDatas> mp_problem;
   std::vector<Path> m_foundPaths;
   std::set<VertexIndex> m_linkedVertices;
+  std::vector<std::pair<bool, RealNumber>> m_setCoef;
 
   /// This method takes a path and returns all possibile vertices
   /// you can add to the input path. The vertices you can apply to the path
@@ -207,6 +252,8 @@ class HESolver {
   template<typename HeuristicT>
   void sort_heuristic_accordance(const VertexIndex& lastInPath,
                                  std::vector<VertexIndex>* vertices);
+
+  void print_header() const;
 };
 
 

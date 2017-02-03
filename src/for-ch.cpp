@@ -93,6 +93,52 @@ void FORCH_Program::init_command_line_parse() {
   m_cmd_args.insert(std::make_pair("verbose",
                                    std::move(verbose)));
 
+  PTR_CmdArg heuristic_a(
+      new FloatArg("a",
+                   "heuristic-a",
+                   "Set the 'a' parameter for heuristic",
+                   false,
+                   0.f,
+                   "float"));
+  m_cmd_args.insert(std::make_pair("heuristic-a",
+                                   std::move(heuristic_a)));
+  PTR_CmdArg heuristic_b(
+      new FloatArg("b",
+                   "heuristic-b",
+                   "Set the 'b' parameter for heuristic",
+                   false,
+                   0.f,
+                   "float"));
+  m_cmd_args.insert(std::make_pair("heuristic-b",
+                                   std::move(heuristic_b)));
+  PTR_CmdArg heuristic_c(
+      new FloatArg("c",
+                   "heuristic-c",
+                   "Set the 'c' parameter for heuristic",
+                   false,
+                   0.f,
+                   "float"));
+  m_cmd_args.insert(std::make_pair("heuristic-c",
+                                   std::move(heuristic_c)));
+  PTR_CmdArg heuristic_d(
+      new FloatArg("d",
+                   "heuristic-d",
+                   "Set the 'd' parameter for heuristic",
+                   false,
+                   0.f,
+                   "float"));
+  m_cmd_args.insert(std::make_pair("heuristic-d",
+                                   std::move(heuristic_d)));
+  PTR_CmdArg heuristic_e(
+      new FloatArg("e",
+                   "heuristic-e",
+                   "Set the 'e' parameter for heuristic",
+                   false,
+                   0.f,
+                   "float"));
+  m_cmd_args.insert(std::make_pair("heuristic-e",
+                                   std::move(heuristic_e)));
+
   for (const auto& arg : m_cmd_args) {
     m_cmd_parser.add(*(arg.second));
   }
@@ -104,7 +150,7 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // Get parameter
   const std::string& dat_filename = dynamic_cast<StringArg*>(
-        m_cmd_args.at("data").get())->getValue();
+      m_cmd_args.at("data").get())->getValue();
   const bool verbose_output = dynamic_cast<FlagArg*>(
       m_cmd_args.at("verbose").get())->getValue();
 
@@ -115,7 +161,41 @@ void FORCH_Program::run(int argc, char** argv) {
   // First phase launch HESolver
   std::vector<bool> he_solution;
   for_ch::HESolver hesolver(mp_problem);
+
+  // Parameters for heuristic solver
+  std::vector<char> params_he = {'a', 'b', 'c', 'd', 'e'};
+  for (const auto& cp : params_he) {
+    const std::string key_flag = std::string("heuristic-") + cp;
+    FloatArg* parg =
+        dynamic_cast<FloatArg*>(m_cmd_args.at(key_flag).get());
+    if (parg->isSet()) {
+      float value = parg->getValue();
+      switch (cp) {
+        case 'a':
+          hesolver.set_param_a(value);
+          break;
+        case 'b':
+          hesolver.set_param_b(value);
+          break;
+        case 'c':
+          hesolver.set_param_c(value);
+          break;
+        case 'd':
+          hesolver.set_param_d(value);
+          break;
+        case 'e':
+          hesolver.set_param_e(value);
+          break;
+        default:
+          // No default should be reached
+          assert(false);
+      }
+    }
+  }
+
+  // Launch heuristic algorithm
   bool he_found = hesolver.run(&he_solution);
+
 
   // Personal crossove flag
   for_ch::GASolver gasolver(mp_problem);

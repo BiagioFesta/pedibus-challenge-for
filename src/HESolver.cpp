@@ -3,17 +3,21 @@
 #include <utility>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include "HESolver.hpp"
 
 namespace for_ch {
 
 HESolver::HESolver(const std::shared_ptr<ProblemDatas>& problem) noexcept :
-    mp_problem(problem) {
+    mp_problem(problem),
+    m_setCoef(5, std::make_pair(false, 0.f)) {
 }
 
 bool HESolver::run(std::vector<bool>* active_edges) {
   assert(active_edges != nullptr);
   active_edges->resize(mp_problem->m_numEdges, false);
+
+  print_header();
 
   bool found_solution = launchProblemSolver<HESolver::Heuristic>();
 
@@ -133,6 +137,20 @@ void HESolver::find_possible_next_nodes(const Path& current_path,
       }
     }
   }
+}
+
+void HESolver::print_header() const {
+  Heuristic h(*this);
+
+  std::cout << "----------------------------------------\n"
+            << "HEURISTIC ALGORITHM PARAMETERS:\n"
+            << "CoefA: " << h.m_current_config.m_A << "\n"
+            << "CoefB: " << h.m_current_config.m_B << "\n"
+            << "CoefC: " << h.m_current_config.m_C << "\n"
+            << "CoefD: " << h.m_current_config.m_D << "\n"
+            << "CoefE: " << h.m_current_config.m_E << "\n"
+            << "----------------------------------------\n";
+  std::cout.flush();
 }
 
 }  // namespace for_ch
