@@ -203,9 +203,9 @@ void GASolver::set_default_parameter() noexcept {
     m_pMutation = 0.002f;
     m_sizePopulation = 4;
   } else if (num_nodes <= 31) {
-    m_pCrossover = 0.9f;
+    m_pCrossover = 0.99f;
     m_pMutation = 0.05f;
-    m_sizePopulation = 4;
+    m_sizePopulation = 12;
   } else if (num_nodes <= 51) {
     m_pCrossover = 0.9f;
     m_pMutation = 0.05f;

@@ -14,7 +14,7 @@ print("Dataset files detected:", list_dataset)
 print("Solver detected: " + solver)
 
 def exec_dataset(file):
-    param = "-t 1"
+    param = "-t 3600"
     command = solver + " " + str(file) + " " + param
     print("Execution:", command)
     sp.call(command, shell = True)
