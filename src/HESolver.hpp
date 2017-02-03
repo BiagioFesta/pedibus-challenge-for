@@ -76,7 +76,7 @@ class HESolver {
         m_current_config.m_A = 0.1;
 		m_current_config.m_B = 1;
 		m_current_config.m_C = 100;
-		m_current_config.m_D = 0.4;
+		m_current_config.m_D = 0.7;
 		m_current_config.m_E = 0;
       } else if (num_nodes <= 301) {
         m_current_config.m_A = 0.1;
@@ -149,7 +149,7 @@ class HESolver {
 
       // m_D factor scale if v2 is near to school
       RealNumber m_D = 0.4;
-
+      // m_E factor scale that oabut the cos of v2 wrt v1->SCHOOL_INDEX
       RealNumber m_E = 0.1;
     };
 
