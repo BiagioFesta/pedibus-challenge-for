@@ -10,39 +10,28 @@ solver = "../for-ch_solver"
 num_cores = mp.cpu_count()
 list_dataset = [f for f in os.listdir(root_dir) if f.endswith(".dat")]
 checker = "pedibus_checker.py"
-datasets = [300]
+datasets = [300, 250, 200, 150, 100, 80, 50]
 
-def start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr):	
+def start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr):	
 	
 	log = open("improvedParameters_"+ str(dataset) +".txt",'a+')
 
-	if(a - max_a < 0):
-		a_mod = a
-	else: 
-		a_mod = a - max_a
-	if(b - max_b < 0):
-		b_mod = b
-	else:
-		 b_mod = b - max_b
-	if(c - max_c < 0):
-		c_mod = 0
-	else: 
-		c_mod = c - max_c
-	if(d - max_d < 0):
-		d_mod = 0
-	else: 
-		d_mod = d - max_d
-	if(e - max_e < 0):
-		e_mod = 0
-	else: 
-		e_mod = e - max_e
+	vet_a = np.linspace(min_a, max_a, a_incr)
+	vet_b = np.linspace(min_b, max_b, b_incr)
+	vet_c = np.linspace(min_c, max_c, c_incr)
+	vet_d = np.linspace(min_d, max_d, d_incr)
+	vet_e = np.linspace(min_e, max_e, e_incr)
+	print(vet_a)
+	print(vet_b)
+	print(vet_c)
+	print(vet_d)
+	print(vet_e)
+	a_mod = min_a
+	b_mod = min_b
+	c_mod = min_c
+	d_mod = min_d
+	e_mod = min_e
 
-	vet_a = np.linspace(a_mod, max_a, a_incr)
-	vet_b = np.linspace(b_mod, max_b, b_incr)
-	vet_c = np.linspace(c_mod, max_c, c_incr)
-	vet_d = np.linspace(d_mod, max_d, d_incr)
-	vet_e = np.linspace(e_mod, max_e, e_incr)
-	
 	for a_mod in vet_a:
 		for b_mod in vet_b:
 			for c_mod in vet_c:
@@ -58,13 +47,12 @@ def start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, 
 						    import time
 						    start_time = time.time()
 						    sp.call(command, timeout = 900, shell = True)
+						    log.write("\n empleased time: %s \n" % (time.time() - start_time))    
+						    param_checker = " pedibus_" + str(dataset) + ".dat ../pedibus_" + str(dataset) + ".sol"						
+						    sp.call("python " + checker + param_checker, stdout = log, shell = True)
+						    log.flush()
 						except sp.TimeoutExpired:
 						    log.write("timeout expired")
-						log.write("\n empleased time: %s \n" % (time.time() - start_time))    
-						param_checker = " pedibus_" + str(dataset) + ".dat ../pedibus_" + str(dataset) + ".sol"						
-						sp.call("python " + checker + param_checker, stdout = log, shell = True)
-						log.flush()
-						
 						log.write("--------------------------------\n")
 
 
@@ -75,7 +63,6 @@ for dataset in datasets:
 		c = 100;
 		d = 0.4;
 		e = 0.1;
-		#current_min_leaf = 444
 		max_a = 0.2
 		a_incr = 5
 		max_b = 3
@@ -86,7 +73,12 @@ for dataset in datasets:
 		d_incr = 101
 		max_e = 0.9
 		e_incr = 101
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_a = 0
+		min_b = 0
+		min_c = 0
+		min_d = 0
+		min_e = 0
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 	if (dataset == 20):
 		a = 0.1;
@@ -104,7 +96,12 @@ for dataset in datasets:
 		d_incr = 100
 		max_e = 0.9
 		e_incr = 100
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_a = 0
+		min_b = 0
+		min_c = 0
+		min_d = 0
+		min_e = 0
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 	if (dataset == 30):
 		a = 0.1;
@@ -122,7 +119,12 @@ for dataset in datasets:
 		d_incr = 100
 		max_e = 0.9
 		e_incr = 100
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_a = 0
+		min_b = 0
+		min_c = 0
+		min_d = 0
+		min_e = 0
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 	if (dataset == 50):
 		a = 0.1;
@@ -131,16 +133,21 @@ for dataset in datasets:
 		d = 0.4;
 		e = 0;
 		max_a = 0.2
-		a_incr = 5
+		min_a = 0
+		a_incr = 3
 		max_b = 3
-		b_incr = 7
-		max_c = 200
-		c_incr = 21
+		min_b = 0
+		b_incr = 4
+		max_c = 150
+		min_c = 50
+		c_incr = 11
 		max_d = 0.9
-		d_incr = 11
+		min_d = 0
+		d_incr = 20
 		max_e = 0.9
-		e_incr = 11
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_e = 0
+		e_incr = 20
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 	if (dataset == 80):
 		a = 0.1;
@@ -149,16 +156,21 @@ for dataset in datasets:
 		d = 0.4;
 		e = 0.1;
 		max_a = 0.2
-		a_incr = 5
+		min_a = 0
+		a_incr = 3
 		max_b = 3
-		b_incr = 7
-		max_c = 200
-		c_incr = 21
+		min_b = 0
+		b_incr = 4
+		max_c = 150
+		min_c = 50
+		c_incr = 11
 		max_d = 0.9
-		d_incr = 11
+		min_d = 0
+		d_incr = 20
 		max_e = 0.9
-		e_incr = 11
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_e = 0
+		e_incr = 20
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 
 	if (dataset == 100):
@@ -168,16 +180,21 @@ for dataset in datasets:
 		d = 0.4;
 		e = 0.1;
 		max_a = 0.2
-		a_incr = 5
+		min_a = 0
+		a_incr = 3
 		max_b = 3
-		b_incr = 7
-		max_c = 200
-		c_incr = 21
+		min_b = 0
+		b_incr = 4
+		max_c = 150
+		min_c = 50
+		c_incr = 11
 		max_d = 0.9
-		d_incr = 11
+		min_d = 0
+		d_incr = 5.5
 		max_e = 0.9
-		e_incr = 11
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_e = 0
+		e_incr = 5.5
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 
 	if (dataset == 150):
@@ -187,16 +204,20 @@ for dataset in datasets:
 		d = 0.4;
 		e = 0.01;
 		max_a = 0.2
-		a_incr = 5
+		min_a = 0
+		a_incr = 3
 		max_b = 3
-		b_incr = 7
-		max_c = 200
-		c_incr = 21
+		min_b = 0
+		b_incr = 4
+		max_c = 60
+		min_c = 20
+		c_incr = 7.8
 		max_d = 0.9
-		d_incr = 11
+		min_d = 0
+		d_incr = 5.5
 		max_e = 0.9
-		e_incr = 101
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		e_incr = 5.5
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 
 	if (dataset == 200):
@@ -206,52 +227,67 @@ for dataset in datasets:
 		d = 0.7;
 		e = 0.01;
 		max_a = 0.2
-		a_incr = 5
+		min_a = 0
+		a_incr = 3
 		max_b = 3
-		b_incr = 7
-		max_c = 200
-		c_incr = 21
+		min_b = 0
+		b_incr = 4
+		max_c = 60
+		min_c = 20
+		c_incr = 7.8
 		max_d = 0.9
-		d_incr = 11
+		min_d = 0
+		d_incr = 5.5
 		max_e = 0.9
-		e_incr = 101
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_e = 0
+		e_incr = 5.5
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 
-	if (dataset == 250):
+	if (dataset == 250): 
 		a = 0.1;
 		b = 1;
 		c = 100;
 		d = 0.7;
 		e = 0;
 		max_a = 0.2
-		a_incr = 5
+		min_a = 0
+		a_incr = 3
 		max_b = 3
-		b_incr = 7
-		max_c = 200
-		c_incr = 21
-		max_d = 0.9
-		d_incr = 11
-		max_e = 0.9
-		e_incr = 101
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
-
-	if (dataset == 300):
-		a = 0.1;
-		b = 1;
-		c = 100;
-		d = 0.7;
-		e = 0;
-		max_a = 0.2
-		a_incr = 5
-		max_b = 3
-		b_incr = 7
+		min_b = 0
+		b_incr = 4
 		max_c = 150
+		min_c = 50
 		c_incr = 11
 		max_d = 0.9
-		d_incr = 10
+		min_d = 0
+		d_incr = 5.5
 		max_e = 0.9
-		e_incr = 100
-		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, a_incr, max_b, b_incr, max_c, c_incr, max_d, d_incr, max_e, e_incr)
+		min_e = 0
+		e_incr = 5.5
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
+
+	if (dataset == 300): 
+		a = 0.1;
+		b = 1;
+		c = 100;
+		d = 0.7;
+		e = 0;
+		max_a = 0.2
+		min_a = 0
+		a_incr = 3
+		max_b = 3
+		min_b = 0
+		b_incr = 4
+		max_c = 150
+		min_c = 50
+		c_incr = 11
+		max_d = 0.9
+		min_d = 0
+		d_incr = 5.5
+		max_e = 0.9
+		min_e = 0
+		e_incr = 5.5
+		start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, max_b, min_b, b_incr, max_c, min_c, c_incr, max_d, min_d, d_incr, max_e, min_e, e_incr)
 
 
