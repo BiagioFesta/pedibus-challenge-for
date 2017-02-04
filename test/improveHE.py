@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os
 import subprocess as sp
 import numpy as np
+import signal
 
 num_cores = mp.cpu_count()
 root_dir = "."
@@ -46,16 +47,18 @@ def start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, 
 						log.write("---------------------------------")
 						log.write('\n' + param + '\n' + str(dataset) + '\n')
 						log.flush()
+						import time
+						start_time = time.time()
 						try:
-						    import time
-						    start_time = time.time()
-						    sp.call(command, timeout = 900, shell = True)
-						    log.write("\n empleased time: %s \n" % (time.time() - start_time))    
-						    param_checker = " pedibus_" + str(dataset) + ".dat ../pedibus_" + str(dataset) + ".sol"						
-						    sp.call("python " + checker + param_checker, stdout = log, shell = True)
-						    log.flush()
+							p = sp.Popen(command, shell = True, preexec_fn = os.setsid)
+							output, error = p.communicate(timeout=900)
+							log.write("\n empleased time: %s \n" % (time.time() - start_time))    
+							param_checker = " pedibus_" + str(dataset) + ".dat ../pedibus_" + str(dataset) + ".sol"						
+							process = sp.call("python " + checker + param_checker, stdout = log, shell = True)
+							log.flush()
 						except sp.TimeoutExpired:
-						    log.write("timeout expired")
+							log.write("timeout expired")
+							os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 						log.write("--------------------------------\n")
 
 def launch_thread(dataset):
