@@ -51,13 +51,13 @@ def start_solver_and_check_result(a, b, c, d, e, dataset, max_a, min_a, a_incr, 
 						start_time = time.time()
 						try:
 							p = sp.Popen(command, shell = True, preexec_fn = os.setsid)
-							output, error = p.communicate(timeout=900)
+							output, error = p.communicate(timeout=4)
 							log.write("\n empleased time: %s \n" % (time.time() - start_time))    
 							param_checker = " pedibus_" + str(dataset) + ".dat ../pedibus_" + str(dataset) + ".sol"						
 							process = sp.call("python " + checker + param_checker, stdout = log, shell = True)
 							log.flush()
 						except sp.TimeoutExpired:
-							log.write("timeout expired")
+							log.write("timeout expired\n")
 							os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 						log.write("--------------------------------\n")
 
