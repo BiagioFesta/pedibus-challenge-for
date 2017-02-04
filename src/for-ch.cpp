@@ -196,7 +196,6 @@ void FORCH_Program::run(int argc, char** argv) {
   // Launch heuristic algorithm
   bool he_found = hesolver.run(&he_solution);
 
-
   // Personal crossove flag
   for_ch::GASolver gasolver(mp_problem);
   const bool& disable_custom_crossover = dynamic_cast<FlagArg*>(
@@ -207,10 +206,22 @@ void FORCH_Program::run(int argc, char** argv) {
   gasolver.set_flag_custom_crossover(~disable_custom_crossover);
   gasolver.set_verbose(verbose_output);
 
-  // Second pgase launch GASolver
-  std::vector<bool> ga_solution = gasolver.run(
-      argc, argv,
-      (he_found == true ? &he_solution : nullptr));
+  // Second phase launch GASolver
+  std::vector<bool> ga_solution;
+  if (time > 0) {
+    ga_solution = gasolver.run(
+        argc, argv, (he_found == true ? &he_solution : nullptr));
+  }
+
+  // Move the final solution
+  std::vector<bool> final_solution;
+  if (time > 0) {
+    final_solution = std::move(ga_solution);
+  } else if (he_found == true) {
+    final_solution = std::move(he_solution);
+  } else {
+    std::runtime_error("Not feasible solution found");
+  }
 
   // Print solution
   const std::string path_complete_binary = std::string(argv[0]);
@@ -222,7 +233,7 @@ void FORCH_Program::run(int argc, char** argv) {
                             dat_filename.find_last_of('.') -
                             dat_filename.find_last_of('/') - 1)
       + ".sol";
-  print_solution(solution_filename, ga_solution);
+  print_solution(solution_filename, final_solution);
   std::cout << "Solution written in the file: '" << solution_filename << "'\n";
 }
 
