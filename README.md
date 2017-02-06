@@ -9,8 +9,8 @@ challenge proposed at *"Politecnico di Milano"*.
 
 ## REQUIREMENTS
 The project has been developed for a *NIX platform.
-Other operative systems has been not tried, and the support
-is not guaranteed. A porting could be take into account in
+Other operative systems have not been tried, and the support
+is not guaranteed. A porting could be taken into account for
 future developments.
 
 ### GCC Version Supported
@@ -29,7 +29,7 @@ The software is "well auto-inclusive". The only library you really need
 is *GSL* (GNU Scientific Library).
 Check how to get it for your distribution.
 
-Moreover the following commands can be used on distributions:
+By the way the following commands can be used on distributions:
 
 ### Ubuntu (16.04 and 16.10)
 In order to compile the software on this distribution, open your terminal
