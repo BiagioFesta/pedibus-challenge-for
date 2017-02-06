@@ -35,9 +35,9 @@ Moreover the following commands can be used on debian-based distributions:
 In order to compile the software on this distribution, open your terminal
 and launch:
 
-    1. `sudo apt-get update && sudo apt-get install -y make g++ libgsl-dev`
-    2. `cd pedibus-challenge-for`
-    3. `make`
+    sudo apt-get update && sudo apt-get install -y make g++ libgsl-dev \
+    cd pedibus-challenge-for \
+    make
     
 The binary will be compiled in the current directory.
 
@@ -45,8 +45,8 @@ The binary will be compiled in the current directory.
 In order to compile the software on this distribution, open your terminal
 and launch:
 
-    1. `sudo pacman -Syu && sudo pacman -S gsl g++ make`
-    2. `cd pedibus-challenge-for`
-    3. `make`
+    sudo pacman -Syu && sudo pacman -S gsl g++ make \
+    cd pedibus-challenge-for \
+    make
     
 The binary will be compiled in the current directory.
