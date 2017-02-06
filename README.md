@@ -29,7 +29,7 @@ The software is "well auto-inclusive". The only library you really need
 is *GSL* (GNU Scientific Library).
 Check how to get it for your distribution.
 
-Moreover the following commands can be used on debian-based distributions:
+Moreover the following commands can be used on distributions:
 
 ### Ubuntu (16.04 and 16.10)
 In order to compile the software on this distribution, open your terminal
@@ -45,7 +45,8 @@ The binary will be compiled in the current directory.
 In order to compile the software on this distribution, open your terminal
 and launch:
 
-    sudo pacman -Syu && sudo pacman -S gsl g++ make \
+    sudo pacman -Syu && \
+    sudo pacman -S gsl gcc make base-devel linux-headers linux-api-headers glibc \
     cd pedibus-challenge-for \
     make
     
