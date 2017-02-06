@@ -107,7 +107,7 @@ class HESolver {
       } else if (num_nodes <= 301) {
         m_current_config.m_A = 0.1;
 		m_current_config.m_B = 1;
-		m_current_config.m_C = 100;
+		m_current_config.m_C = 150;
 		m_current_config.m_D = 0.7;
 		m_current_config.m_E = 0;
       }
