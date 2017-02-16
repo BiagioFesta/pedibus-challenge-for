@@ -9,6 +9,7 @@
 #include "ProblemDatas.hpp"
 #include "GASolver.hpp"
 #include "HESolver.hpp"
+#include "ASolver.hpp"
 
 #define _CMD_HEADER                                             \
   "Foundation Operational Research Challenge\n"                 \
@@ -195,6 +196,11 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // Launch heuristic algorithm
   bool he_found = hesolver.run(&he_solution);
+
+  // Launch the Algorithmic solver
+  std::vector<bool> a_solution;
+  for_ch::ASolver asolver(mp_problem.get());
+  asolver.run(&a_solution);
 
   // Personal crossove flag
   for_ch::GASolver gasolver(mp_problem);

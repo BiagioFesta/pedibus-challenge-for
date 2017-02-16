@@ -13,9 +13,9 @@ all: for-ch_solver ga-lib
 
 for-ch_solver: ga-lib for-ch.cpp GASolver.cpp GASolver.hpp ProblemDatas.cpp \
 		ProblemDatas.hpp TypeUtility.hpp HESolver.hpp \
-		HESolver.cpp
+		HESolver.cpp ASolver.cpp ASolver.hpp
 	$(CXX) $(CXXFLAGS) -I$(GA_INCLUDE_DIR) -I../include -o ../$(OUTPUT) \
-		for-ch.cpp GASolver.cpp ProblemDatas.cpp HESolver.cpp $(LDFLAGS)
+		for-ch.cpp GASolver.cpp ProblemDatas.cpp HESolver.cpp ASolver.cpp $(LDFLAGS)
 
 ga-lib:
 	cd $(GA_DIR); make lib CXXFLAGS="$(CXXFLAGS_GA_LIB)"
