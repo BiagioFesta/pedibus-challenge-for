@@ -36,7 +36,7 @@ unsigned ASolver::run(std::vector<bool>* active_edges) {
 
   active_edges->resize(mp_problem->m_numEdges, false);
   for (const auto& path : m_found_paths) {
-    const std::vector<VertexIndex> nodes = path.m_nodes;
+    const std::vector<VertexIndex>& nodes = path.m_nodes;
     const auto it_last_no_school = nodes.crend() - 1;
     for (auto it = nodes.crbegin(); it != it_last_no_school; ++it) {
       VertexIndex source = *it;
@@ -46,6 +46,7 @@ unsigned ASolver::run(std::vector<bool>* active_edges) {
              mp_problem->m_mapEdge_link2index.cend());
       EdgeIndex edge_index =
           mp_problem->m_mapEdge_link2index.at(std::make_pair(source, target));
+      assert(edge_index < active_edges->size());
       (*active_edges)[edge_index] = true;
     }
   }
@@ -88,6 +89,7 @@ void ASolver::buildPath() {
     found = m_found_paths[i].add_node(node_to_link);
   }
 
+  // If there is no other path to link, create new path
   if (found == false) {
     Path temp_new(mp_problem);
     bool added = temp_new.add_node(node_to_link);
@@ -96,6 +98,7 @@ void ASolver::buildPath() {
     m_found_paths.push_back(std::move(temp_new));
   }
 
+  // The node is linked for sure.
   m_freeNodes.erase(node_to_link);
 }
 

@@ -12,6 +12,12 @@ namespace for_ch {
 class ASolver {
  public:
   ASolver(const ProblemDatas* problem);
+
+  /// @brief run the solver
+  /// @param [out] active_edges  The active active in the solution found
+  /// @return the number of leaves found in that solution
+  /// @note The algorithm is randomic, that means each run may find different
+  /// solution
   unsigned run(std::vector<bool>* active_edges);
 
  private:
