@@ -198,9 +198,21 @@ void FORCH_Program::run(int argc, char** argv) {
   bool he_found = hesolver.run(&he_solution);
 
   // Launch the Algorithmic solver
-  std::vector<bool> a_solution;
+  constexpr unsigned NUM_TRIALS = 1000;
   for_ch::ASolver asolver(mp_problem.get());
-  asolver.run(&a_solution);
+  std::vector<std::pair<unsigned, std::vector<bool>>> a_solutions(NUM_TRIALS);
+  for (unsigned i = 0; i < NUM_TRIALS; ++i) {
+    assert(i < a_solutions.size());
+    auto& sol = a_solutions[i];
+    sol.first = asolver.run(&sol.second);
+  }
+  auto min_leaves = std::min_element(
+      a_solutions.cbegin(), a_solutions.cend(),
+      [] (const std::pair<unsigned, std::vector<bool>>& s1,
+          const std::pair<unsigned, std::vector<bool>>& s2) {
+        return s1.first < s2.first;
+      });
+  unsigned num_min = min_leaves->first;
 
   // Personal crossove flag
   for_ch::GASolver gasolver(mp_problem);

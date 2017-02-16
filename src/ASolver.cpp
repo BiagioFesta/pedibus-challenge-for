@@ -2,6 +2,8 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+#include <random>
+#include <chrono>
 #include "ASolver.hpp"
 
 namespace for_ch {
@@ -10,8 +12,16 @@ ASolver::ASolver(const ProblemDatas* problem) :
     m_freeNodes(CompareDistanceWithSchool(problem)) {
 }
 
-void ASolver::run(std::vector<bool>* active_edges) {
+unsigned ASolver::run(std::vector<bool>* active_edges) {
   assert(active_edges != nullptr);
+
+  // Clean state
+  m_freeNodes.clear();
+  m_found_paths.clear();
+
+  // Set seed
+  m_rnd_engine.seed(
+      std::chrono::system_clock::now().time_since_epoch().count());
 
   const unsigned NUM_NODES = mp_problem->m_numNodes;
   for (VertexIndex i = 0; i < NUM_NODES; ++i) {
@@ -31,11 +41,16 @@ void ASolver::run(std::vector<bool>* active_edges) {
     for (auto it = nodes.crbegin(); it != it_last_no_school; ++it) {
       VertexIndex source = *it;
       VertexIndex target = *(it + 1);
+      assert(mp_problem->m_mapEdge_link2index.find(
+          std::make_pair(source, target)) !=
+             mp_problem->m_mapEdge_link2index.cend());
       EdgeIndex edge_index =
           mp_problem->m_mapEdge_link2index.at(std::make_pair(source, target));
       (*active_edges)[edge_index] = true;
     }
   }
+
+  return m_found_paths.size();
 }
 
 void ASolver::buildPath() {
@@ -52,8 +67,21 @@ void ASolver::buildPath() {
               return d1 < d2;
             });
 
-  // Now we try to link the node with the other path
   const unsigned N_PATH_FOUND = m_found_paths.size();
+
+  // Add randomess perturbations
+  if (N_PATH_FOUND > 1) {
+    RealNumber prob_swap = m_inital_prob_swap;
+    for (unsigned i = 0; i < N_PATH_FOUND - 1; ++i) {
+      const auto x = m_rnd_variable(m_rnd_engine);
+      if (x <= prob_swap) {
+        std::swap(m_found_paths[i], m_found_paths[i+1]);
+      }
+      prob_swap *= m_prob_scale;
+    }
+  }
+
+  // Now we try to link the node with the other path
   bool found = false;
   for (unsigned i = 0; i < N_PATH_FOUND && found == false; ++i) {
     // Get the i-th path and try to attach the node to link

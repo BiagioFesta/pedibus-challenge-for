@@ -1,6 +1,10 @@
 // Copyright 2017 <Biagio Festa> <Alessandro Erba>
 #ifndef __FOR_CH_A_SOLVER_HPP
 #define __FOR_CH_A_SOLVER_HPP
+#include <random>
+#include <set>
+#include <vector>
+#include <algorithm>
 #include "ProblemDatas.hpp"
 
 namespace for_ch {
@@ -8,7 +12,7 @@ namespace for_ch {
 class ASolver {
  public:
   ASolver(const ProblemDatas* problem);
-  void run(std::vector<bool>* active_edges);
+  unsigned run(std::vector<bool>* active_edges);
 
  private:
   struct Path {
@@ -39,6 +43,18 @@ class ASolver {
 
   // Paths found
   std::vector<Path> m_found_paths;
+
+  // Random Engine Generator
+  std::mt19937_64 m_rnd_engine;
+  
+  // Uniform Random variable (0, 1)
+  std::uniform_real_distribution<RealNumber> m_rnd_variable;
+
+  // Probability to swap in perturbation
+  RealNumber m_inital_prob_swap = 0.2;
+  
+  // Scale factor of probability perturbation
+  RealNumber m_prob_scale = 0.8;
 
   void buildPath();
 };
