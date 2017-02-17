@@ -7,6 +7,7 @@
 #include <map>
 #include <cassert>
 #include <unordered_map>
+#include <algorithm>
 
 using VertexIndex = unsigned;
 
@@ -40,5 +41,50 @@ template<typename Key, typename T>
 using HashMapPair = HashMap<Key, T, HashPair>;
 
 static constexpr VertexIndex SCHOOL_INDEX = 0;
+
+namespace for_ch {
+class ProblemDatas;
+}
+
+struct Solution {
+  std::vector<bool> m_active_edges;
+  int m_num_leaves = -1;
+  RealNumber m_danger = -1;
+
+  bool operator==(const Solution& oth) const noexcept {
+    return m_active_edges == oth.m_active_edges;
+  }
+
+  bool operator!=(const Solution& oth) const noexcept {
+    return m_active_edges != oth.m_active_edges;
+  }
+
+  bool operator<(const Solution& oth) const noexcept {
+#ifndef NDEBUG
+    if (m_active_edges < oth.m_active_edges) {
+      assert(*this != oth);
+    }
+#endif
+    return m_active_edges < oth.m_active_edges;
+  }
+
+  bool compute_feasibility(const for_ch::ProblemDatas& problem) const noexcept;
+
+  template<typename T>
+  static void AddSet(const std::set<T>& source,
+                     std::set<T>* destination) noexcept;
+};
+
+
+template<typename T>
+void Solution::AddSet(const std::set<T>& source,
+                      std::set<T>* destination) noexcept {
+  std::for_each(source.cbegin(),
+                source.cend(),
+                [&destination] (const T& e) {
+                  destination->insert(e);
+                });
+}
+
 
 #endif  // __FOR_CH_TYPE_UTILITY_HPP

@@ -12,8 +12,8 @@ ASolver::ASolver(const ProblemDatas* problem) :
     m_freeNodes(CompareDistanceWithSchool(problem)) {
 }
 
-unsigned ASolver::run(std::vector<bool>* active_edges) {
-  assert(active_edges != nullptr);
+void ASolver::run(Solution* out_solution) {
+  assert(out_solution != nullptr);
 
   // Clean state
   m_freeNodes.clear();
@@ -34,9 +34,11 @@ unsigned ASolver::run(std::vector<bool>* active_edges) {
     buildPath();
   }
 
-  active_edges->resize(mp_problem->m_numEdges, false);
+  out_solution->m_active_edges.clear();
+  out_solution->m_active_edges.resize(mp_problem->m_numEdges, false);
   for (const auto& path : m_found_paths) {
     const std::vector<VertexIndex>& nodes = path.m_nodes;
+    assert(nodes.size() > 1);
     const auto it_last_no_school = nodes.crend() - 1;
     for (auto it = nodes.crbegin(); it != it_last_no_school; ++it) {
       VertexIndex source = *it;
@@ -46,12 +48,14 @@ unsigned ASolver::run(std::vector<bool>* active_edges) {
              mp_problem->m_mapEdge_link2index.cend());
       EdgeIndex edge_index =
           mp_problem->m_mapEdge_link2index.at(std::make_pair(source, target));
-      assert(edge_index < active_edges->size());
-      (*active_edges)[edge_index] = true;
+      assert(edge_index < out_solution->m_active_edges.size());
+      out_solution->m_active_edges[edge_index] = true;
     }
   }
 
-  return m_found_paths.size();
+  out_solution->m_num_leaves = m_found_paths.size();
+  out_solution->m_danger = -1;
+  assert(out_solution->compute_feasibility(*mp_problem) == true);
 }
 
 void ASolver::buildPath() {

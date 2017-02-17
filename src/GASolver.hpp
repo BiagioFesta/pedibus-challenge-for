@@ -6,14 +6,13 @@
 #include <algorithm>
 #include <chrono>
 #include <vector>
+#include <set>
 #include "ProblemDatas.hpp"
 
 namespace for_ch {
 
 class GASolver {
  public:
-  using Solution = std::vector<bool>;
-
   explicit GASolver(const ProblemDatas& problem) noexcept;
 
   void set_flag_custom_crossover(bool flag) noexcept {
@@ -30,7 +29,7 @@ class GASolver {
 
   Solution run(int argc,
                char** argv,
-               const std::vector<Solution>& initial_solutions);
+               const std::set<Solution>& initial_solutions);
  private:
   using Genome = GA1DBinaryStringGenome;
   using Clock = std::chrono::system_clock;

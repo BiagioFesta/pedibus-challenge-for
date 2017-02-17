@@ -18,7 +18,7 @@ class ASolver {
   /// @return the number of leaves found in that solution
   /// @note The algorithm is randomic, that means each run may find different
   /// solution
-  unsigned run(std::vector<bool>* active_edges);
+  void run(Solution* out_soution);
 
  private:
   struct Path {

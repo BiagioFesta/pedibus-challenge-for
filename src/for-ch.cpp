@@ -6,6 +6,8 @@
 #include <map>
 #include <utility>
 #include <string>
+#include <limits>
+#include <set>
 #include "ProblemDatas.hpp"
 #include "GASolver.hpp"
 #include "HESolver.hpp"
@@ -38,7 +40,7 @@ class FORCH_Program {
 
   void init_command_line_parse();
   void print_solution(const std::string& filename,
-                      const std::vector<bool>& solution) const;
+                      const Solution& solution) const;
 };
 
 const char FORCH_Program::CMD_HEADER[] = _CMD_HEADER;
@@ -159,6 +161,7 @@ void FORCH_Program::run(int argc, char** argv) {
   mp_problem = std::make_shared<for_ch::ProblemDatas>();
   mp_problem->parse_problem_dat(dat_filename);
 
+  /*
   // First phase launch HESolver
   std::vector<bool> he_solution;
   for_ch::HESolver hesolver(mp_problem);
@@ -196,26 +199,27 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // Launch heuristic algorithm
   bool he_found = hesolver.run(&he_solution);
+  */
 
+  // Set of solution
+  std::set<Solution> solutions;
+
+  // #############################################
   // Launch the Algorithmic solver
-  constexpr unsigned NUM_TRIALS = 1000;
+  constexpr unsigned NUM_SOLU_REQ = 1000;
+  constexpr unsigned NUM_TRIALS = NUM_SOLU_REQ * 10;
   for_ch::ASolver asolver(mp_problem.get());
-  std::vector<std::pair<unsigned, std::vector<bool>>> a_solutions(NUM_TRIALS);
-  for (unsigned i = 0; i < NUM_TRIALS; ++i) {
-    assert(i < a_solutions.size());
-    auto& sol = a_solutions[i];
-    sol.first = asolver.run(&sol.second);
+  Solution temp_solution;
+  for (unsigned i = 0; i < NUM_TRIALS && solutions.size() < NUM_SOLU_REQ; ++i) {
+    asolver.run(&temp_solution);
+    assert(temp_solution.compute_feasibility(*mp_problem) == true);
+    solutions.insert(std::move(temp_solution));
   }
-  auto min_leaves = std::min_element(
-      a_solutions.cbegin(), a_solutions.cend(),
-      [] (const std::pair<unsigned, std::vector<bool>>& s1,
-          const std::pair<unsigned, std::vector<bool>>& s2) {
-        return s1.first < s2.first;
-      });
-  unsigned num_min = min_leaves->first;
+  // #############################################
 
-  // Personal crossove flag
-  for_ch::GASolver gasolver(mp_problem);
+  // #############################################
+  // Launch Genetic Algorithm
+  for_ch::GASolver gasolver(*(mp_problem.get()));
   const bool& disable_custom_crossover = dynamic_cast<FlagArg*>(
       m_cmd_args.at("disable-personal-crossover").get())->getValue();
   const int& time = dynamic_cast<IntArg*>(
@@ -224,21 +228,22 @@ void FORCH_Program::run(int argc, char** argv) {
   gasolver.set_flag_custom_crossover(~disable_custom_crossover);
   gasolver.set_verbose(verbose_output);
 
-  // Second phase launch GASolver
-  std::vector<bool> ga_solution;
+  Solution ga_solution;
   if (time > 0) {
-    ga_solution = gasolver.run(
-        argc, argv, (he_found == true ? &he_solution : nullptr));
+    ga_solution = gasolver.run(argc, argv, solutions);
   }
+  // #############################################
 
-  // Move the final solution
-  std::vector<bool> final_solution;
+  // Construct final solution
+  Solution final_solution;
   if (time > 0) {
-    final_solution = std::move(ga_solution);
-  } else if (he_found == true) {
-    final_solution = std::move(he_solution);
+    final_solution = ga_solution;
   } else {
-    std::runtime_error("Not feasible solution found");
+    final_solution = *std::min_element(
+        solutions.cbegin(), solutions.cend(),
+        [] (const Solution& s1, const Solution& s2) {
+          return s1.m_num_leaves < s2.m_num_leaves;
+        });
   }
 
   // Print solution
@@ -256,9 +261,9 @@ void FORCH_Program::run(int argc, char** argv) {
 }
 
 void FORCH_Program::print_solution(const std::string& filename,
-                                   const std::vector<bool>& solution) const {
+                                   const Solution& solution) const {
   const unsigned num_edges = mp_problem->m_numEdges;
-  assert(solution.size() == num_edges);
+  assert(solution.m_active_edges.size() == num_edges);
 
   std::ofstream file;
   file.open(filename);
@@ -268,8 +273,8 @@ void FORCH_Program::print_solution(const std::string& filename,
   }
 
   for (EdgeIndex i = 0; i < num_edges; ++i) {
-    assert(i < solution.size());
-    bool edge_active = solution[i];
+    assert(i < solution.m_active_edges.size());
+    bool edge_active = solution.m_active_edges[i];
     if (edge_active) {
       const EdgeLink& link = mp_problem->m_mapEdge_index2link.at(i);
       file << link.first << ' ' << link.second << '\n';

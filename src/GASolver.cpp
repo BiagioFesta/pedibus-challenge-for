@@ -16,8 +16,8 @@ GASolver::GASolver(const ProblemDatas& problem) noexcept :
   set_default_parameter();
 }
 
-GASolver::Solution GASolver::run(
-    int argc, char** argv, const std::vector<Solution>& initial_solutions) {
+Solution GASolver::run(
+    int argc, char** argv, const std::set<Solution>& initial_solutions) {
   assert(argv != nullptr);
 
   // Get some information about the problem
@@ -53,6 +53,9 @@ GASolver::Solution GASolver::run(
   ga.terminator(&TerminatorGa);
   ga.parameters(argc, argv);
 
+  // Set the start time
+  m_time_start = Clock::now();
+
   // Execute algorithm
   if (m_display_info == true) {
     unsigned index_step = 0;
@@ -64,6 +67,22 @@ GASolver::Solution GASolver::run(
   } else {
     ga.evolve();
   }
+
+  // Get the best genome and construct best solution
+  const GAStatistics& stats = ga.statistics();
+  const GAPopulation& best_pop = stats.bestPopulation();
+  const Genome& best_genome = dynamic_cast<const Genome&>(best_pop.best());
+  Solution solution;
+  solution.m_active_edges.resize(best_genome.size());
+  for (int b = 0; b < best_genome.size(); ++b) {
+    solution.m_active_edges[b] = best_genome.gene(b);
+  }
+  assert(solution.compute_feasibility(*mp_problem) == true);
+  unsigned best_num_leaves;
+  check_feasibility(best_genome, &best_num_leaves,
+                    &solution.m_danger);
+  solution.m_num_leaves = best_num_leaves;
+  return solution;
 }
 
 void GASolver::set_default_parameter() noexcept {
@@ -137,9 +156,9 @@ void GASolver::init_genome_with_solution(const Solution& solution,
                                          Genome* out_genome) const {
   const unsigned num_edges = mp_problem->m_numEdges;
   for (EdgeIndex e = 0; e < num_edges; ++e) {
-    assert(e < solution.size());
+    assert(e < solution.m_active_edges.size());
     assert(static_cast<int>(e) < out_genome->size());
-    out_genome->gene(e, solution[e]);
+    out_genome->gene(e, solution.m_active_edges[e]);
   }
 }
 
@@ -367,6 +386,19 @@ int GASolver::CrossoverSexGenome(const GAGenome& dad,
 }
 
 GABoolean GASolver::TerminatorGa(GAGeneticAlgorithm& ga) {
+  using Resolution = std::chrono::seconds;
+
+  const auto time_now = Clock::now();
+  const auto time_elapsed =
+      time_now - mps_running_solver->m_time_start;
+
+  const unsigned elapsed_count =
+      std::chrono::duration_cast<Resolution>(time_elapsed).count();
+
+  if (elapsed_count > mps_running_solver->m_timeMax_seconds) {
+    return gaTrue;
+  }
+
   return gaFalse;
 }
 
