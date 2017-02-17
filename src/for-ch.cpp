@@ -257,7 +257,8 @@ void FORCH_Program::run(int argc, char** argv) {
                             dat_filename.find_last_of('/') - 1)
       + ".sol";
   print_solution(solution_filename, final_solution);
-  std::cout << "Solution written in the file: '" << solution_filename << "'\n";
+  std::cout << "\nSolution written in the file: '" <<
+      solution_filename << "'\n";
 }
 
 void FORCH_Program::print_solution(const std::string& filename,

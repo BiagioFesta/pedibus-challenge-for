@@ -5,6 +5,7 @@
 #include <utility>
 #include <set>
 #include <unordered_map>
+#include <queue>
 #include "GASolver.hpp"
 
 namespace for_ch {
@@ -29,10 +30,28 @@ Solution GASolver::run(
   // Initalize Random seeds
   GARandomSeed();
 
+  // Set default parameters
+  set_default_parameter();
+
+  // From all initial solution take only some of then
+  const unsigned NUM_ALL_INITIAL_SOLUTION = initial_solutions.size();
+  std::priority_queue<Solution,
+                      std::vector<Solution>,
+                      ComparatorSolutionNumLeaves> sorted_solutions;
+  for (const auto & solution : initial_solutions) {
+    sorted_solutions.push(solution);
+  }
+  std::set<Solution> filtered_solutions;
+  for (unsigned i = 0; i < m_sizePopulation &&
+           i < NUM_ALL_INITIAL_SOLUTION; ++i) {
+    filtered_solutions.insert(std::move(sorted_solutions.top()));
+    sorted_solutions.pop();
+  }
+
   // Initialize the first population
   GAPopulation initial_population;
   initial_population.order(GAPopulation::LOW_IS_BEST);
-  for (const auto& solution : initial_solutions) {
+  for (const auto& solution : filtered_solutions) {
     Genome genome(num_edges, &EvaluatorGenome);
     genome.mutator(&MutatorGenome);
     if (m_custom_crossover == true) {
@@ -404,11 +423,22 @@ GABoolean GASolver::TerminatorGa(GAGeneticAlgorithm& ga) {
 
 void GASolver::PrintCurrentState(const GAGeneticAlgorithm& ga,
                                  std::ostream* os) {
-  const GAStatistics& stats = ga.statistics();
-  const GAPopulation& best_pop = stats.bestPopulation();
-  const GAGenome& best_genome = best_pop.best();
-  float best_score = best_genome.score();
-  *os << best_score << std::endl;
+  using Resolution = std::chrono::seconds;
+  static TimePoint time_last = Clock::now();
+  const auto time_now = Clock::now();
+  const unsigned tick_elapsed =
+      std::chrono::duration_cast<Resolution>(time_now - time_last).count();
+
+  if (tick_elapsed > 1) {
+    const GAStatistics& stats = ga.statistics();
+    const GAPopulation& best_pop = stats.bestPopulation();
+    const GAGenome& best_genome = best_pop.best();
+    float best_score = best_genome.score();
+    *os << "\r                                 ";
+    *os << "\rCurrent Best Score: " << best_score;
+    os->flush();
+    time_last = time_now;
+  }
 }
 
 }  // namespace for_ch

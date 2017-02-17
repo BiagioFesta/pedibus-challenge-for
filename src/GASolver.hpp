@@ -43,6 +43,14 @@ class GASolver {
     NOTF_NOT_REACH_SCHOOL
   };
 
+  struct ComparatorSolutionNumLeaves {
+    ComparatorSolutionNumLeaves() = default;
+    bool operator()(const Solution& s1,
+                    const Solution& s2) const noexcept {
+      return s1.m_num_leaves > s2.m_num_leaves;
+    }
+  };
+
   const ProblemDatas* mp_problem;
   static const GASolver* mps_running_solver;
   TimePoint m_time_start;
