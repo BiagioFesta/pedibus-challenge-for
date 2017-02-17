@@ -435,7 +435,8 @@ void GASolver::PrintCurrentState(const GAGeneticAlgorithm& ga,
     const GAGenome& best_genome = best_pop.best();
     float best_score = best_genome.score();
     *os << "\r                                 ";
-    *os << "\rCurrent Best Score: " << best_score;
+    *os << "\rCurrent Best Score: " << best_score << " | " <<
+        "Generation: " << ga.generation();
     os->flush();
     time_last = time_now;
   }

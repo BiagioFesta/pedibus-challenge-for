@@ -206,7 +206,11 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // #############################################
   // Launch the Algorithmic solver
-  constexpr unsigned NUM_SOLU_REQ = 1000;
+#ifdef NDEBUG
+  constexpr unsigned NUM_SOLU_REQ = 10000;
+#else
+  constexpr unsigned NUM_SOLU_REQ = 100;
+#endif
   constexpr unsigned NUM_TRIALS = NUM_SOLU_REQ * 10;
 
   std::cout << "ASolver running...\n";
