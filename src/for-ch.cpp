@@ -208,6 +208,8 @@ void FORCH_Program::run(int argc, char** argv) {
   // Launch the Algorithmic solver
   constexpr unsigned NUM_SOLU_REQ = 1000;
   constexpr unsigned NUM_TRIALS = NUM_SOLU_REQ * 10;
+
+  std::cout << "ASolver running...\n";
   for_ch::ASolver asolver(mp_problem.get());
   Solution temp_solution;
   for (unsigned i = 0; i < NUM_TRIALS && solutions.size() < NUM_SOLU_REQ; ++i) {
@@ -215,6 +217,8 @@ void FORCH_Program::run(int argc, char** argv) {
     assert(temp_solution.compute_feasibility(*mp_problem) == true);
     solutions.insert(std::move(temp_solution));
   }
+  std::cout << "ASolver completed\n"
+      "Num Feas. Solution found: " << solutions.size() << "\n";
   // #############################################
 
   // #############################################
@@ -230,7 +234,9 @@ void FORCH_Program::run(int argc, char** argv) {
 
   Solution ga_solution;
   if (time > 0) {
+    std::cout << "GASolver running...\n";
     ga_solution = gasolver.run(argc, argv, solutions);
+    std::cout << "\nGASolver completed\n";
   }
   // #############################################
 
