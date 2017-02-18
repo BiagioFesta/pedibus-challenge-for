@@ -11,9 +11,9 @@ namespace for_ch {
 
 class HESolver {
  public:
-  explicit HESolver(const std::shared_ptr<ProblemDatas>& problem) noexcept;
+  explicit HESolver(const ProblemDatas& problem) noexcept;
 
-  bool run(std::vector<bool>* active_edges);
+  bool run(Solution* out_solution);
 
   void set_param_a(RealNumber value) noexcept {
     assert(0 < m_setCoef.size());
@@ -215,7 +215,7 @@ class HESolver {
     const HeuristicT* mp_h;
   };
 
-  std::shared_ptr<ProblemDatas> mp_problem;
+  const ProblemDatas* mp_problem;
   std::vector<Path> m_foundPaths;
   std::set<VertexIndex> m_linkedVertices;
   std::vector<std::pair<bool, RealNumber>> m_setCoef;

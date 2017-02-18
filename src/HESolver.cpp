@@ -8,15 +8,21 @@
 
 namespace for_ch {
 
-HESolver::HESolver(const std::shared_ptr<ProblemDatas>& problem) noexcept :
-    mp_problem(problem),
+HESolver::HESolver(const ProblemDatas& problem) noexcept :
+    mp_problem(&problem),
     m_setCoef(5, std::make_pair(false, 0.f)) {
 }
 
-bool HESolver::run(std::vector<bool>* active_edges) {
-  assert(active_edges != nullptr);
-  active_edges->resize(mp_problem->m_numEdges, false);
+bool HESolver::run(Solution* out_solution) {
+  assert(out_solution != nullptr);
 
+  // Clean solution
+  out_solution->m_active_edges.clear();
+  out_solution->m_active_edges.resize(mp_problem->m_numEdges, false);
+  out_solution->m_num_leaves = -1;
+  out_solution->m_danger = -1;
+
+  // Print parameters of HE Solver
   print_header();
 
   bool found_solution = launchProblemSolver<HESolver::Heuristic>();
@@ -27,12 +33,14 @@ bool HESolver::run(std::vector<bool>* active_edges) {
       for (unsigned i = 0; i < len_path_minusone; ++i) {
         const VertexIndex source = path.m_pathVertices[i];
         const VertexIndex target = path.m_pathVertices[i + 1];
-        (*active_edges)[mp_problem->m_mapEdge_link2index.at(
-            std::make_pair(source, target))] = true;
+        const EdgeIndex edge = mp_problem->m_mapEdge_link2index.at(
+            std::make_pair(source, target));
+        out_solution->m_active_edges[edge] = true;
       }
     }
   }
 
+  out_solution->m_num_leaves = m_foundPaths.size();
   return found_solution;
 }
 

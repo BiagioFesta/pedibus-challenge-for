@@ -161,10 +161,13 @@ void FORCH_Program::run(int argc, char** argv) {
   mp_problem = std::make_shared<for_ch::ProblemDatas>();
   mp_problem->parse_problem_dat(dat_filename);
 
-  /*
-  // First phase launch HESolver
-  std::vector<bool> he_solution;
-  for_ch::HESolver hesolver(mp_problem);
+  // Set of solution
+  std::set<Solution> solutions;
+
+  // #############################################
+  // Launch Heuristic Algorithm
+  Solution he_solution;
+  for_ch::HESolver hesolver(*mp_problem);
 
   // Parameters for heuristic solver
   std::vector<char> params_he = {'a', 'b', 'c', 'd', 'e'};
@@ -199,10 +202,11 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // Launch heuristic algorithm
   bool he_found = hesolver.run(&he_solution);
-  */
-
-  // Set of solution
-  std::set<Solution> solutions;
+  assert(he_found == true);
+  if (he_found == true) {
+    solutions.insert(he_solution);
+  }
+  // #############################################
 
   // #############################################
   // Launch the Algorithmic solver
