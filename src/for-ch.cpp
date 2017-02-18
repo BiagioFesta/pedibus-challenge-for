@@ -207,7 +207,7 @@ void FORCH_Program::run(int argc, char** argv) {
   if (he_found == true) {
     solutions.insert(he_solution);
   }
-  std::cout << "HESolver completed\n";
+  std::cout << "HESolver completed\n\n";
   // #############################################
 
   // #############################################
@@ -228,7 +228,7 @@ void FORCH_Program::run(int argc, char** argv) {
     solutions.insert(std::move(temp_solution));
   }
   std::cout << "ASolver completed\n"
-      "Num Feas. Solution found: " << solutions.size() << "\n";
+      "Num Feas. Solution found: " << solutions.size() << "\n\n";
   // #############################################
 
   // #############################################
@@ -246,7 +246,7 @@ void FORCH_Program::run(int argc, char** argv) {
   if (time > 0) {
     std::cout << "GASolver running...\n";
     ga_solution = gasolver.run(argc, argv, solutions);
-    std::cout << "\nGASolver completed\n";
+    std::cout << "\nGASolver completed\n\n";
   }
   // #############################################
 

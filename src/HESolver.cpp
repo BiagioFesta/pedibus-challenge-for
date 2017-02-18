@@ -149,16 +149,12 @@ void HESolver::find_possible_next_nodes(const Path& current_path,
 
 void HESolver::print_header() const {
   Heuristic h(*this);
-
-  std::cout << "----------------------------------------\n"
-            << "HEURISTIC ALGORITHM PARAMETERS:\n"
+  std::cout << "Heuristic Algorithm Parameters:\n"
             << "CoefA: " << h.m_current_config.m_A << "\n"
             << "CoefB: " << h.m_current_config.m_B << "\n"
             << "CoefC: " << h.m_current_config.m_C << "\n"
             << "CoefD: " << h.m_current_config.m_D << "\n"
-            << "CoefE: " << h.m_current_config.m_E << "\n"
-            << "----------------------------------------\n";
-  std::cout.flush();
+            << "CoefE: " << h.m_current_config.m_E << std::endl;
 }
 
 }  // namespace for_ch

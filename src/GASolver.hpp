@@ -91,6 +91,7 @@ class GASolver {
   static void AddSet(const std::set<T>& source,
                      std::set<T>* destination) noexcept;
 
+  void print_header(const GAGeneticAlgorithm& ga) const noexcept;
 };  // class GASolver
 
 template<typename T>

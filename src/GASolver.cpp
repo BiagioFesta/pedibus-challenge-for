@@ -72,6 +72,9 @@ Solution GASolver::run(
   ga.terminator(&TerminatorGa);
   ga.parameters(argc, argv);
 
+  // Print parameters of GA
+  print_header(ga);
+
   // Set the start time
   m_time_start = Clock::now();
 
@@ -439,6 +442,19 @@ void GASolver::PrintCurrentState(const GAGeneticAlgorithm& ga,
     os->flush();
     time_last = time_now;
   }
+}
+
+void GASolver::print_header(const GAGeneticAlgorithm& ga) const noexcept {
+  std::cout << "Genetic Algorithm Parameters:\n"
+            << "Population Size: " << ga.populationSize() << "\n"
+            << "Num. Generations: " << ga.nGenerations() << "\n"
+            << "Num. Convergence: " << ga.nConvergence() << "\n"
+            << "Prob. Convergence: " << ga.pConvergence() << "\n"
+            << "Prob. Mutation: " << ga.pMutation() << "\n"
+            << "Prob. Crossover: " << ga.pCrossover() << "\n"
+            << "Custom Crossover: " << m_custom_crossover << "\n"
+            << "Max time [s]: " << m_timeMax_seconds << "\n"
+            << "Fitness Beta: " << m_fitness_beta << std::endl;
 }
 
 }  // namespace for_ch
