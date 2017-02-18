@@ -166,6 +166,7 @@ void FORCH_Program::run(int argc, char** argv) {
 
   // #############################################
   // Launch Heuristic Algorithm
+  std::cout << "HESolver running...\n";
   Solution he_solution;
   for_ch::HESolver hesolver(*mp_problem);
 
@@ -206,6 +207,7 @@ void FORCH_Program::run(int argc, char** argv) {
   if (he_found == true) {
     solutions.insert(he_solution);
   }
+  std::cout << "HESolver completed\n";
   // #############################################
 
   // #############################################
