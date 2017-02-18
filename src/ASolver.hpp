@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <queue>
 #include "ProblemDatas.hpp"
 
 namespace for_ch {
@@ -33,8 +34,8 @@ class ASolver {
   struct CompareDistanceWithSchool {
     CompareDistanceWithSchool(const ProblemDatas* problem);
     bool operator()(const VertexIndex& v1,
-                  const VertexIndex& v2) const {
-      return mp_problem->m_distance_matrix.at(v1).at(SCHOOL_INDEX) <
+                    const VertexIndex& v2) const {
+      return mp_problem->m_distance_matrix.at(v1).at(SCHOOL_INDEX) >
         mp_problem->m_distance_matrix.at(v2).at(SCHOOL_INDEX);
     }
     const ProblemDatas* mp_problem;
@@ -45,7 +46,9 @@ class ASolver {
 
   // A set of node which have to be linked
   // ordered in according to the distance with the school
-  std::set<VertexIndex, CompareDistanceWithSchool> m_freeNodes;
+  std::priority_queue<VertexIndex,
+                      std::vector<VertexIndex>,
+                      CompareDistanceWithSchool> m_freeNodes;
 
   // Paths found
   std::vector<Path> m_found_paths;

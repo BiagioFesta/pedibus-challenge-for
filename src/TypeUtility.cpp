@@ -67,5 +67,20 @@ bool Solution::compute_feasibility(
     }  // for each edge of that node
   }  // for each node except school
 
+  // Check distance constraints, for cycles and school reachability
+  for (VertexIndex n = 1; n < num_nodes; ++n) {
+    if (walked_distance[n] > problem.m_max_distances[n]) {
+      return false;
+    }
+
+    if (nexts[n].find(n) != nexts[n].cend()) {
+      return false;
+    }
+
+    if (nexts[n].find(SCHOOL_INDEX) == nexts[n].cend()) {
+      return false;
+    }
+  }
+
   return true;
 }

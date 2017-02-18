@@ -16,7 +16,9 @@ void ASolver::run(Solution* out_solution) {
   assert(out_solution != nullptr);
 
   // Clean state
-  m_freeNodes.clear();
+  while (m_freeNodes.empty() == false) {
+    m_freeNodes.pop();
+  }
   m_found_paths.clear();
 
   // Set seed
@@ -26,9 +28,11 @@ void ASolver::run(Solution* out_solution) {
   const unsigned NUM_NODES = mp_problem->m_numNodes;
   for (VertexIndex i = 0; i < NUM_NODES; ++i) {
     if (i != SCHOOL_INDEX) {
-      m_freeNodes.insert(i);
+      m_freeNodes.push(i);
+      assert(m_freeNodes.size() == i);
     }
   }
+  assert(m_freeNodes.size() == NUM_NODES - 1);
 
   while (m_freeNodes.empty() == false) {
     buildPath();
@@ -60,7 +64,7 @@ void ASolver::run(Solution* out_solution) {
 
 void ASolver::buildPath() {
   // Get the first node to link
-  VertexIndex node_to_link = *m_freeNodes.cbegin();
+  VertexIndex node_to_link = m_freeNodes.top();
 
   // Sort the path in accordance with the distance
   std::sort(m_found_paths.begin(), m_found_paths.end(),
@@ -103,7 +107,7 @@ void ASolver::buildPath() {
   }
 
   // The node is linked for sure.
-  m_freeNodes.erase(node_to_link);
+  m_freeNodes.pop();
 }
 
 ASolver::Path::Path(const ProblemDatas* problem) :

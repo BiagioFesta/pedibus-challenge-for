@@ -263,6 +263,8 @@ GASolver::FeasibilityStatus GASolver::check_feasibility(
 
   // Check of distance constraint
   assert(walked_distance[SCHOOL_INDEX] == 0);
+
+  // Check distance constraints, for cycles and school reachability
   for (VertexIndex n = 1; n < num_nodes; ++n) {
     if (walked_distance[n] > mp_problem->m_max_distances[n]) {
       if (out_walked_distances) {
@@ -270,10 +272,7 @@ GASolver::FeasibilityStatus GASolver::check_feasibility(
       }
       return NOTF_DISTANCES_CONST;
     }
-  }
 
-  // Check for cycles and school reachability
-  for (VertexIndex n = 1; n < num_nodes; ++n) {
     if (nexts[n].find(n) != nexts[n].cend()) {
       if (out_walked_distances) {
           *out_walked_distances = std::move(walked_distance);
