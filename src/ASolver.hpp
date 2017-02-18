@@ -53,6 +53,9 @@ class ASolver {
   // Paths found
   std::vector<Path> m_found_paths;
 
+  // Cache vector for selecting the node to link
+  std::vector<VertexIndex> m_nodes_discarded;
+  
   // Random Engine Generator
   std::mt19937_64 m_rnd_engine;
   

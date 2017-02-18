@@ -63,8 +63,31 @@ void ASolver::run(Solution* out_solution) {
 }
 
 void ASolver::buildPath() {
-  // Get the first node to link
-  VertexIndex node_to_link = m_freeNodes.top();
+  // Compute the node to link (randomically)
+  m_nodes_discarded.clear();
+  const unsigned num_free_minone = m_freeNodes.size() - 1;
+  VertexIndex node_to_link = SCHOOL_INDEX;
+  RealNumber prob_swap = m_inital_prob_swap;
+  for (unsigned i = 0; i < num_free_minone &&
+           node_to_link == SCHOOL_INDEX; ++i) {
+    const auto x = m_rnd_variable(m_rnd_engine);
+    if (x <= prob_swap) {
+      m_nodes_discarded.push_back(m_freeNodes.top());
+      prob_swap *= m_prob_scale;
+    } else {
+      node_to_link = m_freeNodes.top();
+    }
+    m_freeNodes.pop();
+  }
+  if (node_to_link == SCHOOL_INDEX) {
+    node_to_link = m_freeNodes.top();
+    m_freeNodes.pop();
+  }
+
+  // Reinsert the discarded nodes
+  for (const auto& n : m_nodes_discarded) {
+    m_freeNodes.push(n);
+  }
 
   // Sort the path in accordance with the distance
   std::sort(m_found_paths.begin(), m_found_paths.end(),
@@ -80,7 +103,7 @@ void ASolver::buildPath() {
 
   // Add randomess perturbations
   if (N_PATH_FOUND > 1) {
-    RealNumber prob_swap = m_inital_prob_swap;
+    prob_swap = m_inital_prob_swap;
     for (unsigned i = 0; i < N_PATH_FOUND - 1; ++i) {
       const auto x = m_rnd_variable(m_rnd_engine);
       if (x <= prob_swap) {
@@ -105,9 +128,6 @@ void ASolver::buildPath() {
 
     m_found_paths.push_back(std::move(temp_new));
   }
-
-  // The node is linked for sure.
-  m_freeNodes.pop();
 }
 
 ASolver::Path::Path(const ProblemDatas* problem) :
