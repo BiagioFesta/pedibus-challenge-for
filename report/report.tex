@@ -59,7 +59,10 @@ This document aims to explain how we have accomplished to the annual Foundation 
 \par We will introduce to our solution giving the rational of each one of the solver that we have implemented.
 The document is divided in sections. In section one we will explain the general idea of the whole solution purposed. 
 In the other sections we will explain implemented algorithms. For each one of these we will point out the pros and cons aspect found during our research.
-
+\subsection{note about the code}
+The solution is completely written using C++ 11.\\
+We have developed around 3000 lines of code.
+The solution is tested on Linux x64 but it can be easily ported in other OS.
 \section{General Idea of the Solver}
 The purposed challenge is a multi objective problem. First the number of leaves, second the dangerousness of the path.
 \par Given the first objective we have thought that the most useful approach for building the solver was to express it as  a  Search problem.
@@ -74,6 +77,15 @@ At the same time the second objective suggested the use of a Genetic Algorithm i
 \section{HESolver}
 The gerneral idea of this solver is to find all the paths stating search from the furthest node from the School Node.
 \par In order to do that we compute the distances of all nodes to the school. Starting from the first node (the furthest) we choose the node to attach to it using an Heuristic that orders all the free nodes.
+The heuristic function is composed of 6 different heuristic functions, each one estimates a different parameter.
+Specifically these heuristic parameters are:
+\begin{itemize}
+	\item grade of isolation of a point
+	\item distance from the evaluator point
+	\item the node is considering the attach to  a node alrady in a path
+	\item factor scale if  the considered node is near to school
+	\item how much the connection deviates from the linear connection from node to the school
+\end{itemize}
 In this way every time we add a node to a path we reorder the frontier of attachable node wrt the last attached node. This technique resembles the \fnurl{Greedy Best First }{https://en.wikipedia.org/wiki/Best-first_search} united to a \fnurl{Depth First Search}{https://en.wikipedia.org/wiki/Depth-first_search}.
 
 \subsection*{pros \& cons}
@@ -84,7 +96,7 @@ Cons: Elevate Branching factor leads efficiency in case of Backtracking.
 This algorithm starts form the School Node and orders all the other free nodes from the nearest to the furthest. It connects to the school the nearest node. Than connects all the others (according to their distance to the school node).
 First it tries to connect new nearest to an existent path, if none of the existent path is suitable for the considered node it creates a new one.
 \par An important aspect that we have take in to account is determinism of this algorithm. The order of the attempts of connection to an existent path is defined by the euclidean distance between considered node and the leaf of the considered path. The first path tried is the one which leaf is the nearest to the node that we want to attach. In this way every time that we compute the algorithm we obtain the same solution.
-\par In order to find other feasible solutions, we have introduced a sophisticated method that perturbs the order of found path list according to random probabilities. 
+\par In order to find other feasible solutions and avoid local minimum, we have introduced scaled randomic permutations that perturbs the order of found path list according to random probabilities. 
 \par In Figure 1 we show an example of what randomness perturbation technique can allow. The node 5 is the next node that should be connected to a path. According to the deterministic ordering of connection attempts, we will first try to connect 5 to path that has as leaf 4, and that to the path that has as leaf 3. Assume that the first attempt succeeds, every time that we are in this situation we will connect 5 -> 4. If we consider a wider Node space, are we sure that it is the best connection possible? Of course not.
 \par So if we introduce randomness perturbation we can break determinism and sometimes we can try to attach 5  -> 3 before trying the connection 5 -> 4. If we execute the ASolver for a wide number of time we can find solutions that are better than the deterministic one.
 
@@ -98,4 +110,6 @@ First it tries to connect new nearest to an existent path, if none of the existe
 Pros: fast search in the node space\\
 Cons: none
 \section{GASolver}
+This is the genetic algorithm. It uses best solutions from the solutions found by the HESolver and ASolver. 
+\par Using Crossover and Mutations it can easily decrease the Danger of the solution and sometimes the number of leaves.
 \end{document}
